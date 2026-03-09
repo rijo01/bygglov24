@@ -1,0 +1,139 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=DM+Sans:ital,opsz,wght@0,9..40,300..700;1,9..40,300..700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-display: 'Fraunces', serif;
+  --font-body: 'DM Sans', sans-serif;
+  --brand-primary: #0058a0;
+  --brand-accent: #e8a020;
+  --brand-dark: #07273f;
+  --brand-light: #f0f7ff;
+  --surface: #ffffff;
+  --text-primary: #0f1e2e;
+  --text-muted: #4a6580;
+  --border: #dce8f5;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-body);
+  color: var(--text-primary);
+  background: #fafcff;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Typography */
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  font-optical-sizing: auto;
+}
+
+/* Custom utility classes */
+.container-wide {
+  @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+}
+
+.container-content {
+  @apply max-w-4xl mx-auto px-4 sm:px-6 lg:px-8;
+}
+
+/* Prose styles for MDX content */
+.prose-bygglov h2 {
+  font-family: var(--font-display);
+  @apply text-2xl font-semibold text-slate-900 mt-10 mb-4 leading-tight;
+}
+
+.prose-bygglov h3 {
+  font-family: var(--font-display);
+  @apply text-xl font-semibold text-slate-800 mt-8 mb-3;
+}
+
+.prose-bygglov p {
+  @apply text-slate-700 leading-relaxed mb-5 text-[1.05rem];
+}
+
+.prose-bygglov ul {
+  @apply list-none pl-0 mb-6 space-y-2;
+}
+
+.prose-bygglov ul li {
+  @apply flex gap-3 text-slate-700 leading-relaxed;
+}
+
+.prose-bygglov ul li::before {
+  content: "→";
+  @apply text-brand-600 font-semibold shrink-0 mt-0.5;
+}
+
+.prose-bygglov ol {
+  @apply pl-6 mb-6 space-y-2;
+}
+
+.prose-bygglov ol li {
+  @apply text-slate-700 leading-relaxed;
+}
+
+.prose-bygglov strong {
+  @apply text-slate-900 font-semibold;
+}
+
+.prose-bygglov a {
+  @apply text-brand-600 underline underline-offset-2 hover:text-brand-800 transition-colors;
+}
+
+.prose-bygglov blockquote {
+  @apply border-l-4 border-brand-400 pl-5 py-1 bg-brand-50 rounded-r-lg my-6 italic text-slate-600;
+}
+
+/* Step number styling */
+.step-number {
+  @apply inline-flex items-center justify-center w-8 h-8 rounded-full bg-brand-600 text-white text-sm font-bold shrink-0;
+}
+
+/* Card */
+.card {
+  @apply bg-white rounded-2xl border border-[#dce8f5] shadow-sm;
+}
+
+/* Button */
+.btn-primary {
+  @apply inline-flex items-center gap-2 bg-brand-600 hover:bg-brand-700 text-white font-semibold px-6 py-3 rounded-xl transition-all duration-200 shadow-md hover:shadow-lg hover:-translate-y-0.5;
+}
+
+.btn-secondary {
+  @apply inline-flex items-center gap-2 bg-white hover:bg-brand-50 text-brand-700 font-semibold px-6 py-3 rounded-xl border border-brand-200 transition-all duration-200;
+}
+
+/* Badge */
+.badge {
+  @apply inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1 rounded-full;
+}
+
+/* Animations */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.5s ease-out forwards;
+}
+
+.animate-delay-100 { animation-delay: 0.1s; opacity: 0; }
+.animate-delay-200 { animation-delay: 0.2s; opacity: 0; }
+.animate-delay-300 { animation-delay: 0.3s; opacity: 0; }
+
+/* Focus styles */
+*:focus-visible {
+  @apply outline-2 outline-offset-2 outline-brand-500;
+}
