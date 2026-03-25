@@ -17,15 +17,7 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const data = getKommun(slug);
-  if (!data) {
-    // Generic fallback metadata for kommuner without MDX
-    const namn = slug.charAt(0).toUpperCase() + slug.slice(1).replace(/-/g, " ");
-    return {
-      title: `Bygglov i ${namn} – Regler, avgifter och ansökan`,
-      description: `Allt om bygglov i ${namn} kommun. Handläggningstider, avgifter, kontaktuppgifter och hur du ansöker rätt.`,
-      alternates: { canonical: `https://bygglov24.se/kommun/${slug}` },
-    };
-  }
+  if (!data) return {};
   const { frontmatter: fm } = data;
   return {
     title: fm.title,
@@ -35,6 +27,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title: fm.title,
       description: fm.description,
       type: "article",
+      publishedTime: fm.publishedAt,
+      modifiedTime: fm.updatedAt,
     },
   };
 }
@@ -42,20 +36,24 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function KommunPage({ params }: Props) {
   const { slug } = await params;
   const data = getKommun(slug);
-
-  const namn = slug.charAt(0).toUpperCase() + slug.slice(1).replace(/-/g, " ");
-
-  if (!data) {
-    // Render placeholder page for komunner without MDX yet
-    return <KommunPlaceholder slug={slug} namn={namn} />;
-  }
+  if (!data) notFound();
 
   const { frontmatter: fm, content } = data;
+
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Hem", item: "https://bygglov24.se" },
+      { "@type": "ListItem", position: 2, name: "Kommuner", item: "https://bygglov24.se/kommun" },
+      { "@type": "ListItem", position: 3, name: fm.kommunNamn, item: `https://bygglov24.se/kommun/${slug}` },
+    ],
+  };
 
   const localBusinessSchema = {
     "@context": "https://schema.org",
     "@type": "GovernmentOffice",
-    name: `${fm.kommunNamn} Byggnadsnämnd`,
+    name: `${fm.kommunNamn} kommun – Byggnadsnämnden`,
     address: {
       "@type": "PostalAddress",
       addressLocality: fm.kommunNamn,
@@ -70,7 +68,7 @@ export default async function KommunPage({ params }: Props) {
     ? {
         "@context": "https://schema.org",
         "@type": "FAQPage",
-        mainEntity: fm.faq.map((f) => ({
+        mainEntity: fm.faq.map((f: { question: string; answer: string }) => ({
           "@type": "Question",
           name: f.question,
           acceptedAnswer: { "@type": "Answer", text: f.answer },
@@ -80,6 +78,7 @@ export default async function KommunPage({ params }: Props) {
 
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessSchema) }} />
       {faqSchema && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />}
 
@@ -103,6 +102,11 @@ export default async function KommunPage({ params }: Props) {
                   Bygglov i {fm.kommunNamn}
                 </h1>
                 <p className="text-lg text-slate-600 leading-relaxed">{fm.description}</p>
+                {fm.updatedAt && (
+                  <p className="text-xs text-slate-400 mt-3">
+                    Uppdaterad {new Date(fm.updatedAt).toLocaleDateString("sv-SE", { year: "numeric", month: "long", day: "numeric" })}
+                  </p>
+                )}
               </div>
 
               {/* Quick facts */}
@@ -164,7 +168,7 @@ export default async function KommunPage({ params }: Props) {
                     Vanliga frågor om bygglov i {fm.kommunNamn}
                   </h2>
                   <div className="space-y-4">
-                    {fm.faq.map((f, i) => (
+                    {fm.faq.map((f: { question: string; answer: string }, i: number) => (
                       <details key={i} className="card p-5 group">
                         <summary className="font-semibold text-slate-900 cursor-pointer list-none flex items-center justify-between gap-3">
                           {f.question}
@@ -199,56 +203,26 @@ export default async function KommunPage({ params }: Props) {
                   ))}
                 </div>
               </div>
+
+              <div className="card p-5">
+                <h3 className="font-display font-semibold text-slate-900 mb-3">Guider</h3>
+                <div className="space-y-2">
+                  {[
+                    { href: "/guide/ansokan", label: "Ansöka om bygglov" },
+                    { href: "/guide/nya-regler-2026", label: "Nya regler 2026" },
+                    { href: "/guide/kostnad", label: "Vad kostar bygglov?" },
+                    { href: "/guide/detaljplan", label: "Förstå detaljplanen" },
+                  ].map((item) => (
+                    <Link key={item.href} href={item.href} className="flex items-center gap-2 text-sm text-slate-700 hover:text-brand-700 py-1 transition-colors">
+                      <span className="text-brand-500">→</span> {item.label}
+                    </Link>
+                  ))}
+                </div>
+              </div>
             </aside>
           </div>
         </div>
       </div>
     </>
-  );
-}
-
-function KommunPlaceholder({ slug, namn }: { slug: string; namn: string }) {
-  return (
-    <div className="py-10">
-      <div className="container-wide">
-        <div className="grid lg:grid-cols-[1fr_360px] gap-12 items-start">
-          <div>
-            <nav className="flex items-center gap-2 text-sm text-slate-500 mb-6">
-              <Link href="/" className="hover:text-brand-600">Hem</Link>
-              <span>/</span>
-              <Link href="/kommun" className="hover:text-brand-600">Kommuner</Link>
-              <span>/</span>
-              <span className="text-slate-900">{namn}</span>
-            </nav>
-
-            <h1 className="font-display text-4xl font-bold text-slate-900 mb-4">
-              Bygglov i {namn}
-            </h1>
-            <p className="text-lg text-slate-600 mb-8">
-              Vi sammanställer just nu fullständig bygglovsinformation för {namn} kommun – avgifter, handläggningstider och kontaktuppgifter.
-            </p>
-
-            <div className="card p-6 bg-brand-50 border-brand-100">
-              <h2 className="font-display font-semibold text-slate-900 mb-3">Allmänna regler som gäller i hela Sverige</h2>
-              <ul className="space-y-2 text-sm text-slate-700">
-                <li className="flex gap-2"><span className="text-brand-600 font-bold">→</span> Attefallsåtgärder: upp till 15 kvm utan bygglov, men med anmälan</li>
-                <li className="flex gap-2"><span className="text-brand-600 font-bold">→</span> Friggebod: upp till 15 kvm utan vare sig bygglov eller anmälan</li>
-                <li className="flex gap-2"><span className="text-brand-600 font-bold">→</span> Altan: inom 3,6 m från huset och max 1,8 m höjd är bygglovsbefriat</li>
-                <li className="flex gap-2"><span className="text-brand-600 font-bold">→</span> Handläggningstid är max 10 veckor enligt lag</li>
-              </ul>
-              <div className="mt-4">
-                <Link href="/guide/ansokan" className="btn-secondary text-sm py-2">
-                  Läs fullständig ansökningsguide →
-                </Link>
-              </div>
-            </div>
-          </div>
-
-          <aside className="lg:sticky lg:top-24">
-            <LeadForm source={`kommun-${slug}`} kommun={namn} compact />
-          </aside>
-        </div>
-      </div>
-    </div>
   );
 }

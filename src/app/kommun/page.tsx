@@ -291,19 +291,25 @@ export default function KommunIndexPage() {
               {lan} <span className="text-slate-400 font-normal text-sm">({grouped[lan].length} kommuner)</span>
             </h2>
             <div className="flex flex-wrap gap-2">
-              {grouped[lan].map((k) => (
-                <a
-                  key={k.slug}
-                  href={`/kommun/${k.slug}`}
-                  className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                    hasMdx(k.slug)
-                      ? "bg-brand-100 text-brand-800 hover:bg-brand-200 border border-brand-200"
-                      : "bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200"
-                  }`}
-                >
-                  {k.namn}
-                </a>
-              ))}
+              {grouped[lan].map((k) =>
+                hasMdx(k.slug) ? (
+                  <a
+                    key={k.slug}
+                    href={`/kommun/${k.slug}`}
+                    className="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors bg-brand-100 text-brand-800 hover:bg-brand-200 border border-brand-200"
+                  >
+                    {k.namn}
+                  </a>
+                ) : (
+                  <span
+                    key={k.slug}
+                    className="px-3 py-1.5 rounded-lg text-sm font-medium bg-slate-50 text-slate-400 border border-slate-100 cursor-default"
+                    title="Kommer snart"
+                  >
+                    {k.namn}
+                  </span>
+                )
+              )}
             </div>
           </div>
         ))}
