@@ -33,6 +33,32 @@ export interface KommunFrontmatter {
   faq?: { question: string; answer: string }[];
 }
 
+export interface GuideFrontmatter {
+  title: string;
+  slug: string;
+  description: string;
+  publishedAt: string;
+  updatedAt?: string;
+  keywords?: string[];
+  faq?: { question: string; answer: string }[];
+}
+
+// ── Guider ───────────────────────────────────────────────────────────────────
+
+export function getAllGuider(): (GuideFrontmatter & { slug: string })[] {
+  const dir = path.join(contentDir, "guider");
+  if (!fs.existsSync(dir)) return [];
+  return fs
+    .readdirSync(dir)
+    .filter((f) => f.endsWith(".mdx"))
+    .map((file) => {
+      const raw = fs.readFileSync(path.join(dir, file), "utf-8");
+      const { data } = matter(raw);
+      return { ...(data as GuideFrontmatter), slug: file.replace(".mdx", "") };
+    })
+    .sort((a, b) => a.title.localeCompare(b.title, "sv"));
+}
+
 // ── Åtgärder ──────────────────────────────────────────────────────────────────
 
 export function getAllAtgarder(): (AtgardFrontmatter & { slug: string })[] {

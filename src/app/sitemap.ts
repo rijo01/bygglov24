@@ -1,25 +1,31 @@
 import { MetadataRoute } from "next";
-import { getAllAtgarder, getAllKommuner } from "@/lib/content";
+import { getAllAtgarder, getAllGuider, getAllKommuner } from "@/lib/content";
 
 const BASE = "https://bygglov24.se";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const atgarder = getAllAtgarder();
+  const guider = getAllGuider();
   const kommuner = getAllKommuner();
 
   const staticPages: MetadataRoute.Sitemap = [
     { url: BASE, lastModified: new Date(), changeFrequency: "weekly", priority: 1 },
     { url: `${BASE}/atgard`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.9 },
+    { url: `${BASE}/guide`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.9 },
     { url: `${BASE}/kommun`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.9 },
-    { url: `${BASE}/guide/ansokan`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.8 },
-    { url: `${BASE}/guide/bygglovsbefriat`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.8 },
-    { url: `${BASE}/guide/kostnad`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.8 },
     { url: `${BASE}/konsult`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.85 },
   ];
 
   const atgardPages: MetadataRoute.Sitemap = atgarder.map((a) => ({
     url: `${BASE}/atgard/${a.slug}`,
     lastModified: a.updatedAt ? new Date(a.updatedAt) : new Date(),
+    changeFrequency: "monthly",
+    priority: 0.8,
+  }));
+
+  const guidePages: MetadataRoute.Sitemap = guider.map((g) => ({
+    url: `${BASE}/guide/${g.slug}`,
+    lastModified: g.updatedAt ? new Date(g.updatedAt) : new Date(),
     changeFrequency: "monthly",
     priority: 0.8,
   }));
@@ -31,5 +37,5 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.7,
   }));
 
-  return [...staticPages, ...atgardPages, ...kommunPages];
+  return [...staticPages, ...atgardPages, ...guidePages, ...kommunPages];
 }
