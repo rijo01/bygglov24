@@ -24,6 +24,13 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://bygglov24.se",
   },
+  icons: {
+    icon: [
+      { url: "/favicon.svg", type: "image/svg+xml" },
+      { url: "/favicon.ico", sizes: "any" },
+    ],
+    apple: "/favicon.svg",
+  },
 };
 
 const orgSchema = {
