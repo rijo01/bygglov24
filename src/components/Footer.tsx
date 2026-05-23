@@ -104,7 +104,7 @@ export default function Footer() {
           <div className="flex gap-5">
             <Link href="/integritetspolicy" className="hover:text-slate-300 transition-colors">Integritetspolicy</Link>
             <Link href="/om-oss" className="hover:text-slate-300 transition-colors">Om oss</Link>
-            <Link href="/kontakt" className="hover:text-slate-300 transition-colors">Kontakt</Link>
+            <a href="mailto:info@bygglov24.se" className="hover:text-slate-300 transition-colors">Kontakt</a>
           </div>
         </div>
       </div>
