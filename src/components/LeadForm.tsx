@@ -20,11 +20,34 @@ export default function LeadForm({ source = "generic", atgard, kommun, compact =
   const handleSubmit = async () => {
     if (!form.name || !form.email || !form.phone) return;
     setStep("loading");
+
+    const formattedMessage = [
+      `Namn:      ${form.name}`,
+      `E-post:    ${form.email}`,
+      `Telefon:   ${form.phone}`,
+      atgard ? `Åtgärd:    ${atgard}` : null,
+      kommun ? `Kommun:    ${kommun}` : null,
+      `Källa:     ${source || "okänd"}`,
+      "",
+      form.message ? `Meddelande:\n${form.message}` : "Inget meddelande",
+    ]
+      .filter(Boolean)
+      .join("\n");
+
     try {
-      const res = await fetch("/api/lead", {
+      const res = await fetch("https://api.web3forms.com/submit", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, source, atgard, kommun }),
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({
+          access_key: "c666ec4f-ba04-4e5b-9403-31d6accf8dd8",
+          subject: "Ny lead – bygglov24.se",
+          from_name: form.name,
+          email: form.email,
+          message: formattedMessage,
+        }),
       });
       if (res.ok) {
         setStep("success");
