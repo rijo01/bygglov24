@@ -53,6 +53,8 @@ export default async function AtgardPage({ params }: Props) {
       }
     : null;
 
+  const canonical = `https://www.bygglov24.se/atgard/${slug}`;
+
   const articleSchema = {
     "@context": "https://schema.org",
     "@type": "Article",
@@ -60,7 +62,18 @@ export default async function AtgardPage({ params }: Props) {
     description: fm.description,
     datePublished: fm.publishedAt,
     dateModified: fm.updatedAt || fm.publishedAt,
+    mainEntityOfPage: canonical,
     publisher: { "@type": "Organization", name: "Bygglov24.se", url: "https://bygglov24.se" },
+  };
+
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Hem", item: "https://www.bygglov24.se" },
+      { "@type": "ListItem", position: 2, name: "Åtgärdstyper", item: "https://www.bygglov24.se/atgard" },
+      { "@type": "ListItem", position: 3, name: fm.title, item: canonical },
+    ],
   };
 
   return (
@@ -69,6 +82,7 @@ export default async function AtgardPage({ params }: Props) {
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       )}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
 
       <div className="py-10">
         <div className="container-wide">

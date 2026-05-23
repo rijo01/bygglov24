@@ -20,16 +20,30 @@ interface GuideFrontmatter {
 const guidesDir = path.join(process.cwd(), "content", "guider");
 const atgarderDir = path.join(process.cwd(), "content", "atgarder");
 
-function getGuide(slug: string): { frontmatter: GuideFrontmatter; content: string } | null {
-  for (const dir of [guidesDir, atgarderDir]) {
+type GuideSource = "guider" | "atgarder";
+
+function getGuide(
+  slug: string
+): { frontmatter: GuideFrontmatter; content: string; source: GuideSource } | null {
+  const dirs: { path: string; source: GuideSource }[] = [
+    { path: guidesDir, source: "guider" },
+    { path: atgarderDir, source: "atgarder" },
+  ];
+  for (const { path: dir, source } of dirs) {
     const filePath = path.join(dir, `${slug}.mdx`);
     if (fs.existsSync(filePath)) {
       const raw = fs.readFileSync(filePath, "utf-8");
       const { data, content } = matter(raw);
-      return { frontmatter: data as GuideFrontmatter, content };
+      return { frontmatter: data as GuideFrontmatter, content, source };
     }
   }
   return null;
+}
+
+function canonicalFor(slug: string, source: GuideSource): string {
+  return source === "atgarder"
+    ? `https://www.bygglov24.se/atgard/${slug}`
+    : `https://www.bygglov24.se/guide/${slug}`;
 }
 
 function getAllGuides(): GuideFrontmatter[] {
@@ -62,12 +76,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const data = getGuide(slug);
   if (!data) return {};
-  const { frontmatter: fm } = data;
+  const { frontmatter: fm, source } = data;
   return {
     title: fm.title,
     description: fm.description,
     keywords: fm.keywords?.join(", "),
-    alternates: { canonical: `https://bygglov24.se/guide/${slug}` },
+    alternates: { canonical: canonicalFor(slug, source) },
     openGraph: {
       title: fm.title,
       description: fm.description,
@@ -83,7 +97,8 @@ export default async function GuidePage({ params }: Props) {
   const data = getGuide(slug);
   if (!data) notFound();
 
-  const { frontmatter: fm, content } = data;
+  const { frontmatter: fm, content, source } = data;
+  const canonical = canonicalFor(slug, source);
 
   const faqSchema = fm.faq?.length
     ? {
@@ -104,7 +119,18 @@ export default async function GuidePage({ params }: Props) {
     description: fm.description,
     datePublished: fm.publishedAt,
     dateModified: fm.updatedAt || fm.publishedAt,
+    mainEntityOfPage: canonical,
     publisher: { "@type": "Organization", name: "Bygglov24.se", url: "https://bygglov24.se" },
+  };
+
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Hem", item: "https://www.bygglov24.se" },
+      { "@type": "ListItem", position: 2, name: "Guider", item: "https://www.bygglov24.se/guide" },
+      { "@type": "ListItem", position: 3, name: fm.title, item: canonical },
+    ],
   };
 
   return (
@@ -113,6 +139,7 @@ export default async function GuidePage({ params }: Props) {
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       )}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
 
       <div className="py-10">
         <div className="container-wide">
