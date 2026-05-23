@@ -18,25 +18,35 @@ interface GuideFrontmatter {
 }
 
 const guidesDir = path.join(process.cwd(), "content", "guider");
+const atgarderDir = path.join(process.cwd(), "content", "atgarder");
 
 function getGuide(slug: string): { frontmatter: GuideFrontmatter; content: string } | null {
-  const filePath = path.join(guidesDir, `${slug}.mdx`);
-  if (!fs.existsSync(filePath)) return null;
-  const raw = fs.readFileSync(filePath, "utf-8");
-  const { data, content } = matter(raw);
-  return { frontmatter: data as GuideFrontmatter, content };
+  for (const dir of [guidesDir, atgarderDir]) {
+    const filePath = path.join(dir, `${slug}.mdx`);
+    if (fs.existsSync(filePath)) {
+      const raw = fs.readFileSync(filePath, "utf-8");
+      const { data, content } = matter(raw);
+      return { frontmatter: data as GuideFrontmatter, content };
+    }
+  }
+  return null;
 }
 
 function getAllGuides(): GuideFrontmatter[] {
-  if (!fs.existsSync(guidesDir)) return [];
-  return fs
-    .readdirSync(guidesDir)
-    .filter((f) => f.endsWith(".mdx"))
-    .map((file) => {
-      const raw = fs.readFileSync(path.join(guidesDir, file), "utf-8");
+  const seen = new Set<string>();
+  const result: GuideFrontmatter[] = [];
+  for (const dir of [guidesDir, atgarderDir]) {
+    if (!fs.existsSync(dir)) continue;
+    for (const file of fs.readdirSync(dir).filter((f) => f.endsWith(".mdx"))) {
+      const slug = file.replace(".mdx", "");
+      if (seen.has(slug)) continue;
+      seen.add(slug);
+      const raw = fs.readFileSync(path.join(dir, file), "utf-8");
       const { data } = matter(raw);
-      return { ...(data as GuideFrontmatter), slug: file.replace(".mdx", "") };
-    });
+      result.push({ ...(data as GuideFrontmatter), slug });
+    }
+  }
+  return result;
 }
 
 interface Props {

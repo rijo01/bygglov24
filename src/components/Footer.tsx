@@ -11,10 +11,10 @@ const atgarder = [
 
 const guider = [
   { href: "/guide/ansokan", label: "Ansöka om bygglov" },
-  { href: "/guide/bygglovsbefriat", label: "Bygglovsbefriat" },
+  { href: "/guide/bygga-utan-bygglov", label: "Bygglovsbefriat" },
   { href: "/guide/kostnad", label: "Vad kostar bygglov?" },
-  { href: "/guide/handlaggning", label: "Handläggningstid" },
-  { href: "/guide/avslag", label: "Överklaga avslag" },
+  { href: "/guide/nya-regler-2026", label: "Nya regler 2026" },
+  { href: "/guide/overklaga-bygglov", label: "Överklaga avslag" },
 ];
 
 const storstader = [

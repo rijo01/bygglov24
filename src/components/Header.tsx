@@ -6,7 +6,7 @@ const nav = [
   { href: "/atgard", label: "Åtgärdstyper" },
   { href: "/kommun", label: "Kommuner" },
   { href: "/guide/attefallsatgard", label: "Attefallsåtgärder" },
-  { href: "/guide/bygglovsbefriat", label: "Bygglovsbefriat" },
+  { href: "/guide/bygga-utan-bygglov", label: "Bygglovsbefriat" },
   { href: "/konsult", label: "Hitta konsult" },
 ];
 
