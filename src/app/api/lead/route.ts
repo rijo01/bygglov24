@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
+const WEB3FORMS_ACCESS_KEY = "c666ec4f-ba04-4e5b-9403-31d6accf8dd8";
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
@@ -9,12 +11,6 @@ export async function POST(req: NextRequest) {
 
     if (!name || !email || !phone) {
       return NextResponse.json({ error: "Obligatoriska fält saknas" }, { status: 400 });
-    }
-
-    const accessKey = process.env.WEB3FORMS_ACCESS_KEY;
-    if (!accessKey) {
-      console.error("Lead API error: WEB3FORMS_ACCESS_KEY not set");
-      return NextResponse.json({ error: "Internt serverfel" }, { status: 500 });
     }
 
     const formattedMessage = [
@@ -39,7 +35,7 @@ export async function POST(req: NextRequest) {
         Accept: "application/json",
       },
       body: JSON.stringify({
-        access_key: accessKey,
+        access_key: WEB3FORMS_ACCESS_KEY,
         subject: "Ny lead – bygglov24.se",
         from_name: name,
         email,
