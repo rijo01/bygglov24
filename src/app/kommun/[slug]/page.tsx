@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { MDXRemote } from "next-mdx-remote/rsc";
+import remarkGfm from "remark-gfm";
 import { getKommun, getAllKommuner } from "@/lib/content";
 import LeadForm from "@/components/LeadForm";
 
@@ -158,7 +159,7 @@ export default async function KommunPage({ params }: Props) {
 
               {/* MDX body */}
               <div className="prose-bygglov">
-                <MDXRemote source={content} />
+                <MDXRemote source={content} options={{ mdxOptions: { remarkPlugins: [remarkGfm] } }} />
               </div>
 
               {/* FAQ */}

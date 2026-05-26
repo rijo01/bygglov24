@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { MDXRemote } from "next-mdx-remote/rsc";
+import remarkGfm from "remark-gfm";
 import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
@@ -164,7 +165,7 @@ export default async function GuidePage({ params }: Props) {
               </div>
 
               <div className="prose-bygglov">
-                <MDXRemote source={content} />
+                <MDXRemote source={content} options={{ mdxOptions: { remarkPlugins: [remarkGfm] } }} />
               </div>
 
               {fm.faq && fm.faq.length > 0 && (

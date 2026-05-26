@@ -95,6 +95,37 @@ h1, h2, h3, h4 {
   @apply border-l-4 border-brand-400 pl-5 py-1 bg-brand-50 rounded-r-lg my-6 italic text-slate-600;
 }
 
+/* GFM tables */
+.prose-bygglov table {
+  @apply w-full my-8 text-sm border-collapse overflow-hidden rounded-xl border border-[#dce8f5] shadow-sm bg-white;
+}
+
+.prose-bygglov thead {
+  @apply bg-brand-50;
+}
+
+.prose-bygglov th {
+  @apply px-4 py-3 text-left font-semibold text-slate-900 border-b-2 border-brand-200;
+}
+
+.prose-bygglov td {
+  @apply px-4 py-2.5 text-slate-700 border-t border-slate-100 align-top;
+}
+
+.prose-bygglov tbody tr:nth-child(even) {
+  @apply bg-slate-50/60;
+}
+
+.prose-bygglov tbody tr:hover {
+  @apply bg-brand-50/50;
+}
+
+/* Right-align last column (typically price) */
+.prose-bygglov th:last-child,
+.prose-bygglov td:last-child {
+  @apply text-right tabular-nums;
+}
+
 /* Step number styling */
 .step-number {
   @apply inline-flex items-center justify-center w-8 h-8 rounded-full bg-brand-600 text-white text-sm font-bold shrink-0;
