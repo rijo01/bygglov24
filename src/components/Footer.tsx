@@ -10,10 +10,11 @@ const atgarder = [
 ];
 
 const guider = [
+  { href: "/guide/nya-bygglovsregler-2025-2026", label: "Nya regler 2026 (PBL-reformen)" },
+  { href: "/guide/bygglov-i-efterhand", label: "Bygglov i efterhand" },
+  { href: "/kalkylator", label: "Bygglovskalkylator" },
   { href: "/guide/ansokan", label: "Ansöka om bygglov" },
-  { href: "/guide/bygga-utan-bygglov", label: "Bygglovsbefriat" },
   { href: "/guide/kostnad", label: "Vad kostar bygglov?" },
-  { href: "/guide/nya-regler-2026", label: "Nya regler 2026" },
   { href: "/guide/overklaga-bygglov", label: "Överklaga avslag" },
 ];
 
