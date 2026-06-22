@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useId, useState } from "react";
 
 interface LeadFormProps {
   source?: string;
@@ -9,15 +9,19 @@ interface LeadFormProps {
 }
 
 export default function LeadForm({ source = "generic", atgard, kommun, compact = false }: LeadFormProps) {
+  const uid = useId();
   const [step, setStep] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [form, setForm] = useState({
     name: "",
     email: "",
     phone: "",
     message: "",
+    botcheck: "", // honeypot – ska aldrig fyllas i av en människa
   });
 
   const handleSubmit = async () => {
+    // Honeypot: om det dolda fältet är ifyllt är det en bot – skicka inte.
+    if (form.botcheck) return;
     if (!form.name || !form.email || !form.phone) return;
     setStep("loading");
 
@@ -47,6 +51,7 @@ export default function LeadForm({ source = "generic", atgard, kommun, compact =
           from_name: form.name,
           email: form.email,
           message: formattedMessage,
+          botcheck: form.botcheck, // web3forms honeypot-konvention
         }),
       });
       if (res.ok) {
@@ -97,9 +102,24 @@ export default function LeadForm({ source = "generic", atgard, kommun, compact =
       )}
 
       <div className="space-y-3">
-        <div>
-          <label className="block text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wide">Namn *</label>
+        {/* Honeypot – dolt för människor, fångar bottar. Lämna tomt. */}
+        <div className="absolute -left-[9999px] top-0 h-0 w-0 overflow-hidden" aria-hidden="true">
+          <label htmlFor={`${uid}-company`}>Lämna detta fält tomt</label>
           <input
+            id={`${uid}-company`}
+            type="text"
+            name="botcheck"
+            tabIndex={-1}
+            autoComplete="off"
+            value={form.botcheck}
+            onChange={(e) => setForm({ ...form, botcheck: e.target.value })}
+          />
+        </div>
+
+        <div>
+          <label htmlFor={`${uid}-name`} className="block text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wide">Namn *</label>
+          <input
+            id={`${uid}-name`}
             type="text"
             placeholder="Anna Svensson"
             value={form.name}
@@ -110,8 +130,9 @@ export default function LeadForm({ source = "generic", atgard, kommun, compact =
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label className="block text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wide">E-post *</label>
+            <label htmlFor={`${uid}-email`} className="block text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wide">E-post *</label>
             <input
+              id={`${uid}-email`}
               type="email"
               placeholder="anna@exempel.se"
               value={form.email}
@@ -120,8 +141,9 @@ export default function LeadForm({ source = "generic", atgard, kommun, compact =
             />
           </div>
           <div>
-            <label className="block text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wide">Telefon *</label>
+            <label htmlFor={`${uid}-phone`} className="block text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wide">Telefon *</label>
             <input
+              id={`${uid}-phone`}
               type="tel"
               placeholder="070-123 45 67"
               value={form.phone}
@@ -132,8 +154,9 @@ export default function LeadForm({ source = "generic", atgard, kommun, compact =
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wide">Beskriv ditt projekt</label>
+          <label htmlFor={`${uid}-message`} className="block text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wide">Beskriv ditt projekt</label>
           <textarea
+            id={`${uid}-message`}
             rows={3}
             placeholder={`T.ex. "Vill bygga till 25 kvm på min villa i ${kommun || "Stockholm"}"...`}
             value={form.message}
@@ -163,11 +186,13 @@ export default function LeadForm({ source = "generic", atgard, kommun, compact =
           )}
         </button>
 
-        {step === "error" && (
-          <p className="text-red-600 text-sm text-center">Något gick fel – prova igen eller ring oss.</p>
-        )}
+        <div aria-live="polite">
+          {step === "error" && (
+            <p role="alert" className="text-red-600 text-sm text-center">Något gick fel – prova igen eller ring oss.</p>
+          )}
+        </div>
 
-        <p className="text-xs text-slate-400 text-center">
+        <p className="text-xs text-slate-600 text-center">
           Genom att skicka godkänner du vår <a href="/integritetspolicy" className="underline hover:text-slate-600">integritetspolicy</a>. Inga förpliktelser.
         </p>
       </div>

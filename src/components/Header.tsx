@@ -35,7 +35,7 @@ export default function Header() {
               <Link
                 key={item.href}
                 href={item.href}
-                className="px-3 py-2 text-sm font-medium text-slate-600 hover:text-brand-700 hover:bg-brand-50 rounded-lg transition-colors"
+                className="min-h-11 inline-flex items-center px-3 py-2 text-sm font-medium text-slate-600 hover:text-brand-700 hover:bg-brand-50 rounded-lg transition-colors"
               >
                 {item.label}
               </Link>
@@ -72,7 +72,7 @@ export default function Header() {
                 key={item.href}
                 href={item.href}
                 onClick={() => setOpen(false)}
-                className="block px-3 py-2.5 text-sm font-medium text-slate-700 hover:text-brand-700 hover:bg-brand-50 rounded-lg transition-colors"
+                className="flex items-center min-h-11 px-3 py-2.5 text-sm font-medium text-slate-700 hover:text-brand-700 hover:bg-brand-50 rounded-lg transition-colors"
               >
                 {item.label}
               </Link>

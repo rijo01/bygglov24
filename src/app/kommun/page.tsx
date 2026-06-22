@@ -352,7 +352,7 @@ export default function KommunIndexPage() {
         {sortedLan.map((lan) => (
           <div key={lan}>
             <h2 className="font-display text-lg font-bold text-slate-700 mb-4 pb-2 border-b border-slate-100">
-              {lan} <span className="text-slate-400 font-normal text-sm">({grouped[lan].length} kommuner)</span>
+              {lan} <span className="text-slate-600 font-normal text-sm">({grouped[lan].length} kommuner)</span>
             </h2>
             <div className="flex flex-wrap gap-2">
               {grouped[lan].map((k) =>
@@ -360,14 +360,14 @@ export default function KommunIndexPage() {
                   <a
                     key={k.slug}
                     href={`/kommun/${k.slug}`}
-                    className="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors bg-brand-100 text-brand-800 hover:bg-brand-200 border border-brand-200"
+                    className="min-h-11 inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium transition-colors bg-brand-100 text-brand-800 hover:bg-brand-200 border border-brand-200"
                   >
                     {k.namn}
                   </a>
                 ) : (
                   <span
                     key={k.slug}
-                    className="px-3 py-1.5 rounded-lg text-sm font-medium bg-slate-50 text-slate-400 border border-slate-100 cursor-default"
+                    className="min-h-11 inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium bg-slate-50 text-slate-400 border border-slate-100 cursor-default"
                     title="Kommer snart"
                   >
                     {k.namn}

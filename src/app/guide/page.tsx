@@ -90,7 +90,7 @@ export default function GuideIndexPage() {
                 {guide.description}
               </p>
               {guide.updatedAt && (
-                <p className="text-xs text-slate-400 mt-3">
+                <p className="text-xs text-slate-600 mt-3">
                   Uppdaterad{" "}
                   {new Date(guide.updatedAt).toLocaleDateString("sv-SE", {
                     year: "numeric",

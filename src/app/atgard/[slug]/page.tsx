@@ -116,7 +116,7 @@ export default async function AtgardPage({ params }: Props) {
                 <h1 className="font-display text-4xl font-bold text-slate-900 mb-4 leading-tight">{fm.title}</h1>
                 <p className="text-lg text-slate-600 leading-relaxed">{fm.description}</p>
                 {fm.updatedAt && (
-                  <p className="text-xs text-slate-400 mt-3">
+                  <p className="text-xs text-slate-600 mt-3">
                     Uppdaterad {new Date(fm.updatedAt).toLocaleDateString("sv-SE", { year: "numeric", month: "long", day: "numeric" })}
                   </p>
                 )}

@@ -1,16 +1,21 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { getAllKommuner, getAllGuider } from "@/lib/content";
+
+const TOTALA_KOMMUNER = 290;
+const PUBLICERADE_KOMMUNER = getAllKommuner().length;
+const PUBLICERADE_GUIDER = getAllGuider().length;
 
 export const metadata: Metadata = {
   title: "Om Bygglov24 – Sveriges kompletta guide till bygglov",
   description:
-    "Bygglov24 är Sveriges mest kompletta guide till bygglov med information för alla 290 kommuner. Kostnadsfri matchning med lokala bygglovskonsulter.",
+    `Bygglov24 är Sveriges mest kompletta guide till bygglov med information för ${PUBLICERADE_KOMMUNER} av ${TOTALA_KOMMUNER} kommuner. Kostnadsfri matchning med lokala bygglovskonsulter.`,
   alternates: { canonical: "https://bygglov24.se/om-oss" },
 };
 
 const stats = [
-  { value: "290", label: "Kommuner" },
-  { value: "30+", label: "Guider" },
+  { value: `${PUBLICERADE_KOMMUNER}`, label: "Kommuner" },
+  { value: `${PUBLICERADE_GUIDER}`, label: "Guider" },
   { value: "24h", label: "Svarstid" },
 ];
 
@@ -30,7 +35,7 @@ export default function OmOssPage() {
             Om Bygglov24
           </h1>
           <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-            Sveriges mest kompletta guide till bygglov – för alla 290 kommuner.
+            Sveriges mest kompletta guide till bygglov – för {PUBLICERADE_KOMMUNER} av {TOTALA_KOMMUNER} kommuner.
           </p>
         </div>
 
@@ -49,7 +54,7 @@ export default function OmOssPage() {
             Att söka bygglov i Sverige kan vara förvirrande. Reglerna skiljer sig mellan kommuner, detaljplaner är svårtolkade och processen kräver rätt handlingar i rätt ordning. <strong>Bygglov24</strong> finns för att göra resan enklare för dig som planerar ett byggprojekt.
           </p>
           <p>
-            Vi samlar och uppdaterar information om bygglov från Sveriges alla 290 kommuner och kompletterar med guider, regelförklaringar och praktiska checklistor – allt skrivet på begriplig svenska.
+            Vi samlar och uppdaterar information om bygglov från {PUBLICERADE_KOMMUNER} av Sveriges {TOTALA_KOMMUNER} kommuner och kompletterar med guider, regelförklaringar och praktiska checklistor – allt skrivet på begriplig svenska.
           </p>
 
           <h2>Vad vi gör</h2>
