@@ -5,6 +5,7 @@ import { MDXRemote } from "next-mdx-remote/rsc";
 import remarkGfm from "remark-gfm";
 import { getAtgard, getAllAtgarder } from "@/lib/content";
 import LeadForm from "@/components/LeadForm";
+import { mdxComponents } from "@/components/mdx-components";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -150,7 +151,7 @@ export default async function AtgardPage({ params }: Props) {
 
               {/* MDX body */}
               <div className="prose-bygglov">
-                <MDXRemote source={content} options={{ mdxOptions: { remarkPlugins: [remarkGfm] } }} />
+                <MDXRemote source={content} components={mdxComponents} options={{ blockJS: false, mdxOptions: { remarkPlugins: [remarkGfm] } }} />
               </div>
 
               {/* FAQ */}

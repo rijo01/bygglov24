@@ -7,6 +7,7 @@ import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
 import LeadForm from "@/components/LeadForm";
+import { mdxComponents } from "@/components/mdx-components";
 
 interface GuideFrontmatter {
   title: string;
@@ -165,7 +166,7 @@ export default async function GuidePage({ params }: Props) {
               </div>
 
               <div className="prose-bygglov">
-                <MDXRemote source={content} options={{ mdxOptions: { remarkPlugins: [remarkGfm] } }} />
+                <MDXRemote source={content} components={mdxComponents} options={{ blockJS: false, mdxOptions: { remarkPlugins: [remarkGfm] } }} />
               </div>
 
               {fm.faq && fm.faq.length > 0 && (

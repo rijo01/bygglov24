@@ -66,13 +66,17 @@ h1, h2, h3, h4 {
   @apply list-none pl-0 mb-6 space-y-2;
 }
 
+/* Pil-bullet via absolut positionering – får INTE vara display:flex på <li>,
+   då blir varje inline-segment (text + <strong>) ett eget flex-item och
+   meningen splittras till ett rutnät. Med relative/absolute flödar inline-
+   texten normalt och wrappar rent på mobil. */
 .prose-bygglov ul li {
-  @apply flex gap-3 text-slate-700 leading-relaxed;
+  @apply relative pl-6 text-slate-700 leading-relaxed;
 }
 
 .prose-bygglov ul li::before {
   content: "→";
-  @apply text-brand-600 font-semibold shrink-0 mt-0.5;
+  @apply absolute left-0 top-0 text-brand-600 font-semibold;
 }
 
 .prose-bygglov ol {
