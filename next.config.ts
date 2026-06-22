@@ -7,6 +7,14 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return [
+      // Kanonisk värd: www -> apex (non-www). Kodnivå-skydd utöver Vercels primary domain
+      // så att SEO-signalerna konsolideras till https://bygglov24.se.
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "www.bygglov24.se" }],
+        destination: "https://bygglov24.se/:path*",
+        permanent: true,
+      },
       // Fånga gammal länkkraft från tidigare ägare: /bygglov-<kommun> -> /kommun/<kommun>.
       // Inga befintliga routes börjar på /bygglov-, så mönstret krockar inte.
       {

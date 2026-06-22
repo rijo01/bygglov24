@@ -71,8 +71,8 @@ const breadcrumbSchema = {
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",
   itemListElement: [
-    { "@type": "ListItem", position: 1, name: "Hem", item: "https://www.bygglov24.se" },
-    { "@type": "ListItem", position: 2, name: "Bygglovskalkylator", item: "https://www.bygglov24.se/kalkylator" },
+    { "@type": "ListItem", position: 1, name: "Hem", item: "https://bygglov24.se" },
+    { "@type": "ListItem", position: 2, name: "Bygglovskalkylator", item: "https://bygglov24.se/kalkylator" },
   ],
 };
 

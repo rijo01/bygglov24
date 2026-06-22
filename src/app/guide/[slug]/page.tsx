@@ -44,8 +44,8 @@ function getGuide(
 
 function canonicalFor(slug: string, source: GuideSource): string {
   return source === "atgarder"
-    ? `https://www.bygglov24.se/atgard/${slug}`
-    : `https://www.bygglov24.se/guide/${slug}`;
+    ? `https://bygglov24.se/atgard/${slug}`
+    : `https://bygglov24.se/guide/${slug}`;
 }
 
 function getAllGuides(): GuideFrontmatter[] {
@@ -129,8 +129,8 @@ export default async function GuidePage({ params }: Props) {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Hem", item: "https://www.bygglov24.se" },
-      { "@type": "ListItem", position: 2, name: "Guider", item: "https://www.bygglov24.se/guide" },
+      { "@type": "ListItem", position: 1, name: "Hem", item: "https://bygglov24.se" },
+      { "@type": "ListItem", position: 2, name: "Guider", item: "https://bygglov24.se/guide" },
       { "@type": "ListItem", position: 3, name: fm.title, item: canonical },
     ],
   };

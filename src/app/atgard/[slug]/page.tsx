@@ -56,7 +56,7 @@ export default async function AtgardPage({ params }: Props) {
       }
     : null;
 
-  const canonical = `https://www.bygglov24.se/atgard/${slug}`;
+  const canonical = `https://bygglov24.se/atgard/${slug}`;
 
   const articleSchema = {
     "@context": "https://schema.org",
@@ -73,8 +73,8 @@ export default async function AtgardPage({ params }: Props) {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Hem", item: "https://www.bygglov24.se" },
-      { "@type": "ListItem", position: 2, name: "Åtgärdstyper", item: "https://www.bygglov24.se/atgard" },
+      { "@type": "ListItem", position: 1, name: "Hem", item: "https://bygglov24.se" },
+      { "@type": "ListItem", position: 2, name: "Åtgärdstyper", item: "https://bygglov24.se/atgard" },
       { "@type": "ListItem", position: 3, name: fm.title, item: canonical },
     ],
   };
