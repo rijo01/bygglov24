@@ -3,6 +3,7 @@ import Link from "next/link";
 import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
+import { Icon, type IconName } from "@/lib/icons";
 
 export const metadata: Metadata = {
   title: "Guider om bygglov – Allt du behöver veta",
@@ -43,16 +44,16 @@ function getAllGuides(): Guide[] {
     });
 }
 
-const guideIcons: Record<string, string> = {
-  ansokan: "📝",
-  kostnad: "💰",
-  "nya-regler-2026": "⚖️",
-  kontrollansvarig: "👷",
-  detaljplan: "🗺️",
-  strandskydd: "🏖️",
-  "bygga-utan-bygglov": "🏗️",
-  "overklaga-bygglov": "⚠️",
-  byggsanktionsavgift: "💸",
+const guideIcons: Record<string, IconName> = {
+  ansokan: "file-text",
+  kostnad: "coins",
+  "nya-regler-2026": "scale",
+  kontrollansvarig: "hard-hat",
+  detaljplan: "map",
+  strandskydd: "waves",
+  "bygga-utan-bygglov": "building-2",
+  "overklaga-bygglov": "triangle-alert",
+  byggsanktionsavgift: "receipt",
 };
 
 export default function GuideIndexPage() {
@@ -82,7 +83,7 @@ export default function GuideIndexPage() {
               href={`/guide/${guide.slug}`}
               className="card p-6 hover:shadow-md hover:border-brand-200 transition-all group"
             >
-              <div className="text-3xl mb-3">{guideIcons[guide.slug] || "📖"}</div>
+              <Icon name={guideIcons[guide.slug] ?? "file-text"} className="w-7 h-7 text-brand-600 mb-3" />
               <h2 className="font-display font-semibold text-slate-900 text-base group-hover:text-brand-700 transition-colors mb-2">
                 {guide.title}
               </h2>

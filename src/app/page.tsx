@@ -3,6 +3,7 @@ import Link from "next/link";
 import LeadForm from "@/components/LeadForm";
 import { getAllKommuner, normalizeKommunSlug } from "@/lib/content";
 import { getAtgarderGrid } from "@/lib/atgarder";
+import { Icon } from "@/lib/icons";
 
 const TOTALA_KOMMUNER = 290;
 
@@ -133,7 +134,7 @@ export default function HomePage() {
                 href={`/atgard/${a.slug}`}
                 className="card p-5 hover:shadow-md hover:border-brand-200 transition-all group"
               >
-                <div className="text-3xl mb-3">{a.icon}</div>
+                <Icon name={a.icon} className="w-8 h-8 text-brand-600 mb-3" />
                 <h3 className="font-display font-semibold text-slate-900 text-sm group-hover:text-brand-700 transition-colors">
                   {a.label}
                 </h3>

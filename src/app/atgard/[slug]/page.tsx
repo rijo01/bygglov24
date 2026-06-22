@@ -6,6 +6,7 @@ import remarkGfm from "remark-gfm";
 import { getAtgard, getAllAtgarder } from "@/lib/content";
 import LeadForm from "@/components/LeadForm";
 import { mdxComponents } from "@/components/mdx-components";
+import { Icon } from "@/lib/icons";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -104,13 +105,14 @@ export default async function AtgardPage({ params }: Props) {
               <div className="mb-8">
                 <div className="flex flex-wrap items-center gap-2 mb-4">
                   <span className={`badge ${!fm.kravpaBuildlov ? "bg-green-100 text-green-700" : "bg-amber-100 text-amber-700"}`}>
-                    {!fm.kravpaBuildlov ? "✓ Bygglov krävs ej" : "⚠ Kräver bygglov"}
+                    <Icon name={!fm.kravpaBuildlov ? "check" : "triangle-alert"} className="w-3.5 h-3.5" />
+                    {!fm.kravpaBuildlov ? "Bygglov krävs ej" : "Kräver bygglov"}
                   </span>
                   {fm.maxStorlek && (
                     <span className="badge bg-brand-100 text-brand-700">Max {fm.maxStorlek}</span>
                   )}
                   {fm.handlaggning && (
-                    <span className="badge bg-slate-100 text-slate-600">⏱ {fm.handlaggning}</span>
+                    <span className="badge bg-slate-100 text-slate-600"><Icon name="clock" className="w-3.5 h-3.5" /> {fm.handlaggning}</span>
                   )}
                 </div>
                 <h1 className="font-display text-4xl font-bold text-slate-900 mb-4 leading-tight">{fm.title}</h1>

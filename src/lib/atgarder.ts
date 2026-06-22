@@ -1,4 +1,5 @@
 import { getAllAtgarder } from "@/lib/content";
+import type { IconName } from "@/lib/icons";
 
 /**
  * Single source of truth for the åtgärd grid shown on BOTH the homepage and /atgard.
@@ -8,15 +9,15 @@ import { getAllAtgarder } from "@/lib/content";
  */
 const ATGARD_DISPLAY: Record<
   string,
-  { icon: string; label: string; shortDesc: string; order: number }
+  { icon: IconName; label: string; shortDesc: string; order: number }
 > = {
-  attefallsatgard: { icon: "🏠", label: "Attefallsåtgärder", shortDesc: "Bygglovsbefriade komplementbyggnader", order: 1 },
-  tillbyggnad: { icon: "📐", label: "Tillbyggnad", shortDesc: "Utöka bostadsytan", order: 2 },
-  "carport-garage": { icon: "🚗", label: "Carport & Garage", shortDesc: "Regler och undantag", order: 3 },
-  "altan-uteplats": { icon: "🌿", label: "Altan & Uteplats", shortDesc: "Bygga altan rätt", order: 4 },
-  friggebod: { icon: "🛖", label: "Friggebod", shortDesc: "Komplementbyggnad utan anmälan", order: 5 },
-  "plank-mur": { icon: "🧱", label: "Plank & Mur", shortDesc: "Höjd och placering", order: 6 },
-  solpaneler: { icon: "☀️", label: "Solpaneler", shortDesc: "Oftast bygglovsbefriat", order: 7 },
+  attefallsatgard: { icon: "house", label: "Attefallsåtgärder", shortDesc: "Bygglovsbefriade komplementbyggnader", order: 1 },
+  tillbyggnad: { icon: "ruler", label: "Tillbyggnad", shortDesc: "Utöka bostadsytan", order: 2 },
+  "carport-garage": { icon: "car", label: "Carport & Garage", shortDesc: "Regler och undantag", order: 3 },
+  "altan-uteplats": { icon: "trees", label: "Altan & Uteplats", shortDesc: "Bygga altan rätt", order: 4 },
+  friggebod: { icon: "warehouse", label: "Friggebod", shortDesc: "Komplementbyggnad utan anmälan", order: 5 },
+  "plank-mur": { icon: "brick-wall", label: "Plank & Mur", shortDesc: "Höjd och placering", order: 6 },
+  solpaneler: { icon: "sun", label: "Solpaneler", shortDesc: "Oftast bygglovsbefriat", order: 7 },
 };
 
 export interface AtgardGridItem {
@@ -24,7 +25,7 @@ export interface AtgardGridItem {
   title: string;
   description: string;
   kravpaBuildlov: boolean;
-  icon: string;
+  icon: IconName;
   label: string;
   shortDesc: string;
 }
@@ -39,7 +40,7 @@ export function getAtgarderGrid(): AtgardGridItem[] {
         title: a.title,
         description: a.description,
         kravpaBuildlov: a.kravpaBuildlov,
-        icon: d?.icon ?? "🏠",
+        icon: d?.icon ?? "house",
         label: d?.label ?? a.title,
         shortDesc: d?.shortDesc ?? a.description,
         order: d?.order ?? 999,

@@ -6,6 +6,7 @@ import remarkGfm from "remark-gfm";
 import { getKommun, getAllKommuner } from "@/lib/content";
 import LeadForm from "@/components/LeadForm";
 import { mdxComponents } from "@/components/mdx-components";
+import { Icon } from "@/lib/icons";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -117,7 +118,7 @@ export default async function KommunPage({ params }: Props) {
                 <div className="grid sm:grid-cols-2 gap-4">
                   {fm.handlaggningstid && (
                     <div className="flex items-start gap-3">
-                      <div className="text-2xl">⏱</div>
+                      <Icon name="clock" className="w-6 h-6 text-brand-600 shrink-0" />
                       <div>
                         <div className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-0.5">Handläggningstid</div>
                         <div className="font-semibold text-slate-900 text-sm">{fm.handlaggningstid}</div>
@@ -126,7 +127,7 @@ export default async function KommunPage({ params }: Props) {
                   )}
                   {fm.avgiftEnkel && (
                     <div className="flex items-start gap-3">
-                      <div className="text-2xl">💰</div>
+                      <Icon name="coins" className="w-6 h-6 text-brand-600 shrink-0" />
                       <div>
                         <div className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-0.5">Avgift (enkel åtgärd)</div>
                         <div className="font-semibold text-slate-900 text-sm">{fm.avgiftEnkel}</div>
@@ -135,7 +136,7 @@ export default async function KommunPage({ params }: Props) {
                   )}
                   {fm.telefonByggnadskontor && (
                     <div className="flex items-start gap-3">
-                      <div className="text-2xl">📞</div>
+                      <Icon name="phone" className="w-6 h-6 text-brand-600 shrink-0" />
                       <div>
                         <div className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-0.5">Byggnadsnämnden</div>
                         <a href={`tel:${fm.telefonByggnadskontor}`} className="font-semibold text-brand-600 text-sm hover:text-brand-800">
@@ -146,7 +147,7 @@ export default async function KommunPage({ params }: Props) {
                   )}
                   {fm.webbplatsByggnadskontor && (
                     <div className="flex items-start gap-3">
-                      <div className="text-2xl">🌐</div>
+                      <Icon name="globe" className="w-6 h-6 text-brand-600 shrink-0" />
                       <div>
                         <div className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-0.5">Officiell webbplats</div>
                         <a href={fm.webbplatsByggnadskontor} target="_blank" rel="noopener noreferrer" className="font-semibold text-brand-600 text-sm hover:text-brand-800 break-all">

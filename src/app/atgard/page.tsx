@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getAtgarderGrid } from "@/lib/atgarder";
+import { Icon } from "@/lib/icons";
 
 export const metadata: Metadata = {
   title: "Åtgärdstyper – Vad kräver bygglov?",
@@ -46,13 +47,14 @@ export default function AtgardIndexPage() {
               className="card p-6 hover:shadow-md hover:border-brand-200 transition-all group"
             >
               <div className="flex items-start justify-between gap-3 mb-4">
-                <span className="text-4xl">{"icon" in a ? a.icon : "🏠"}</span>
+                <Icon name={a.icon} className="w-9 h-9 text-brand-600" />
                 <span className={`badge shrink-0 ${
                   !a.kravpaBuildlov
                     ? "bg-green-100 text-green-700"
                     : "bg-amber-100 text-amber-700"
                 }`}>
-                  {!a.kravpaBuildlov ? "✓ Ej bygglov" : "Bygglov krävs"}
+                  <Icon name={!a.kravpaBuildlov ? "check" : "triangle-alert"} className="w-3.5 h-3.5" />
+                  {!a.kravpaBuildlov ? "Ej bygglov" : "Bygglov krävs"}
                 </span>
               </div>
               <h2 className="font-display text-lg font-semibold text-slate-900 group-hover:text-brand-700 transition-colors mb-2">

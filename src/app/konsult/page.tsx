@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import LeadForm from "@/components/LeadForm";
+import { Icon, type IconName } from "@/lib/icons";
 
 export const metadata: Metadata = {
   title: "Hitta bygglovskonsult – Kostnadsfri matchning",
@@ -8,11 +9,11 @@ export const metadata: Metadata = {
   alternates: { canonical: "https://bygglov24.se/konsult" },
 };
 
-const fordelar = [
-  { icon: "🎯", title: "Lokal expertis", text: "Konsulterna känner din kommuns byggnadsnämnd och detaljplaner." },
-  { icon: "⚡", title: "Snabbare process", text: "Rätt handlingar från start = kortare handläggningstid." },
-  { icon: "✅", title: "Högre godkännandegrad", text: "Professionella ansökningar avslås sällan." },
-  { icon: "💰", title: "Kostnadskontroll", text: "Fast pris eller timarvode – du väljer. Offert utan förpliktelser." },
+const fordelar: { icon: IconName; title: string; text: string }[] = [
+  { icon: "target", title: "Lokal expertis", text: "Konsulterna känner din kommuns byggnadsnämnd och detaljplaner." },
+  { icon: "zap", title: "Snabbare process", text: "Rätt handlingar från start = kortare handläggningstid." },
+  { icon: "circle-check", title: "Högre godkännandegrad", text: "Professionella ansökningar avslås sällan." },
+  { icon: "coins", title: "Kostnadskontroll", text: "Fast pris eller timarvode – du väljer. Offert utan förpliktelser." },
 ];
 
 const serviceSchema = {
@@ -48,7 +49,7 @@ export default function KonsultPage() {
               <div className="grid sm:grid-cols-2 gap-5 mb-10">
                 {fordelar.map((f) => (
                   <div key={f.title} className="card p-5">
-                    <div className="text-3xl mb-3">{f.icon}</div>
+                    <Icon name={f.icon} className="w-7 h-7 text-brand-600 mb-3" />
                     <h3 className="font-display font-semibold text-slate-900 mb-1">{f.title}</h3>
                     <p className="text-sm text-slate-600">{f.text}</p>
                   </div>

@@ -1,5 +1,6 @@
 "use client";
 import { useId, useState } from "react";
+import { Icon } from "@/lib/icons";
 
 interface LeadFormProps {
   source?: string;
@@ -199,13 +200,13 @@ export default function LeadForm({ source = "generic", atgard, kommun, compact =
 
       {/* Trust signals */}
       <div className="mt-5 pt-5 border-t border-slate-100 grid grid-cols-3 gap-3 text-center">
-        {[
-          { icon: "🔒", text: "Säker hantering" },
-          { icon: "⚡", text: "Svar inom 24h" },
-          { icon: "✅", text: "Helt kostnadsfritt" },
-        ].map((t) => (
+        {([
+          { icon: "shield-check", text: "Säker hantering" },
+          { icon: "clock", text: "Svar inom 24h" },
+          { icon: "circle-check", text: "Helt kostnadsfritt" },
+        ] as const).map((t) => (
           <div key={t.text}>
-            <div className="text-lg mb-0.5">{t.icon}</div>
+            <Icon name={t.icon} className="w-5 h-5 mx-auto mb-1 text-brand-600" />
             <div className="text-xs text-slate-500">{t.text}</div>
           </div>
         ))}
