@@ -4,6 +4,17 @@ import matter from "gray-matter";
 
 const contentDir = path.join(process.cwd(), "content");
 
+/** Normalize a Swedish municipality name to its ASCII route slug (å/ä→a, ö→o). */
+export function normalizeKommunSlug(namn: string): string {
+  return namn
+    .toLowerCase()
+    .replace(/å/g, "a")
+    .replace(/ä/g, "a")
+    .replace(/ö/g, "o")
+    .replace(/é/g, "e")
+    .replace(/\s+/g, "-");
+}
+
 export interface AtgardFrontmatter {
   title: string;
   slug: string;

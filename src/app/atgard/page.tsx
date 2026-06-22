@@ -1,33 +1,16 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { getAllAtgarder } from "@/lib/content";
+import { getAtgarderGrid } from "@/lib/atgarder";
 
 export const metadata: Metadata = {
   title: "Åtgärdstyper – Vad kräver bygglov?",
   description:
-    "Komplett guide till alla åtgärdstyper och bygglovsregler i Sverige. Välj din åtgärd och se exakt vad som gäller – från Attefallsåtgärder till pool och plank.",
+    "Komplett guide till åtgärdstyper och bygglovsregler i Sverige. Välj din åtgärd och se exakt vad som gäller – från Attefallsåtgärder till solpaneler och plank.",
   alternates: { canonical: "https://bygglov24.se/atgard" },
 };
 
-// Fallback static cards if no MDX files exist yet
-const staticAtgarder = [
-  { slug: "attefallsatgard", title: "Attefallsåtgärder", description: "Bygg upp till 15 kvm utan bygglov – men med anmälan.", icon: "🏠", kravpaBuildlov: false },
-  { slug: "tillbyggnad", title: "Tillbyggnad", description: "Utöka din bostad – vad kräver bygglov och vad är undantag?", icon: "📐", kravpaBuildlov: true },
-  { slug: "carport-garage", title: "Carport & Garage", description: "Regler för carport, garage och komplementbyggnader.", icon: "🚗", kravpaBuildlov: true },
-  { slug: "altan-uteplats", title: "Altan & Uteplats", description: "Bygg altan utan bygglov inom 3,6 meter från huset.", icon: "🌿", kravpaBuildlov: false },
-  { slug: "friggebod", title: "Friggebod", description: "15 kvm friggebodar kräver varken bygglov eller anmälan.", icon: "🛖", kravpaBuildlov: false },
-  { slug: "plank-mur", title: "Plank & Mur", description: "Höjd, placering och undantag för plank och murar.", icon: "🧱", kravpaBuildlov: true },
-  { slug: "inglasning", title: "Inglasning av altan", description: "Inglasning räknas ofta som bygglovspliktigt ingrepp.", icon: "🪟", kravpaBuildlov: true },
-  { slug: "pool", title: "Pool & Markarbeten", description: "Marklov, poolregler och placering nära tomtgränsen.", icon: "💧", kravpaBuildlov: false },
-  { slug: "solpaneler", title: "Solpaneler", description: "Solpaneler på taket är ofta bygglovsbefriat sedan 2018.", icon: "☀️", kravpaBuildlov: false },
-  { slug: "skylt", title: "Skyltar & Reklam", description: "Skyltlov krävs i de flesta kommuner för skyltar.", icon: "📛", kravpaBuildlov: true },
-  { slug: "eldstad-skorsten", title: "Eldstad & Skorsten", description: "Installation av eldstad kräver alltid anmälan.", icon: "🔥", kravpaBuildlov: false },
-  { slug: "nybyggnation", title: "Nybyggnation", description: "Bygga nytt hus – komplett guide till processen.", icon: "🏗️", kravpaBuildlov: true },
-];
-
 export default function AtgardIndexPage() {
-  const mdxAtgarder = getAllAtgarder();
-  const atgarder = mdxAtgarder.length > 0 ? mdxAtgarder : staticAtgarder;
+  const atgarder = getAtgarderGrid();
 
   return (
     <div className="py-12">

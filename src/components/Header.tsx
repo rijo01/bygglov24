@@ -5,7 +5,7 @@ import { useState } from "react";
 const nav = [
   { href: "/atgard", label: "Åtgärdstyper" },
   { href: "/kommun", label: "Kommuner" },
-  { href: "/guide/nya-bygglovsregler-2025-2026", label: "Nya regler 2026" },
+  { href: "/guide/nya-regler-2026", label: "Nya regler 2026" },
   { href: "/kalkylator", label: "Kalkylator" },
   { href: "/konsult", label: "Hitta konsult" },
 ];

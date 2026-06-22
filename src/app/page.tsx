@@ -1,40 +1,26 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import LeadForm from "@/components/LeadForm";
+import { getAllKommuner, normalizeKommunSlug } from "@/lib/content";
+import { getAtgarderGrid } from "@/lib/atgarder";
+
+const TOTALA_KOMMUNER = 290;
 
 export const metadata: Metadata = {
   title: "Bygglov24.se – Allt om bygglov i Sverige",
   description:
-    "Komplett guide till bygglov i Sverige. Lär dig vad som kräver bygglov, hur du ansöker och hitta godkänd bygglovskonsult i din kommun. Täcker alla 290 kommuner.",
+    "Guide till bygglov i Sverige. Lär dig vad som kräver bygglov, hur du ansöker och hitta godkänd bygglovskonsult i din kommun.",
   alternates: { canonical: "https://bygglov24.se" },
 };
-
-const atgarder = [
-  { slug: "attefallsatgard", label: "Attefallsåtgärder", icon: "🏠", desc: "Upp till 15 kvm utan bygglov" },
-  { slug: "tillbyggnad", label: "Tillbyggnad", icon: "📐", desc: "Utöka bostadsytan" },
-  { slug: "carport-garage", label: "Carport & Garage", icon: "🚗", desc: "Regler och undantag" },
-  { slug: "altan-uteplats", label: "Altan & Uteplats", icon: "🌿", desc: "Bygga altan rätt" },
-  { slug: "friggebod", label: "Friggebod", icon: "🛖", desc: "15 kvm utan anmälan" },
-  { slug: "plank-mur", label: "Plank & Mur", icon: "🧱", desc: "Höjd och placering" },
-  { slug: "inglasning", label: "Inglasning", icon: "🪟", desc: "Altan och uterum" },
-  { slug: "pool", label: "Pool", icon: "💧", desc: "Marklov och regler" },
-];
 
 const storstader = [
   "Stockholm", "Göteborg", "Malmö", "Uppsala", "Linköping",
   "Örebro", "Västerås", "Helsingborg", "Norrköping", "Jönköping",
 ];
 
-const stats = [
-  { value: "290", label: "Kommunguider" },
-  { value: "15+", label: "Åtgärdstyper" },
-  { value: "Gratis", label: "Konsultmatchning" },
-  { value: "24h", label: "Svarstid" },
-];
-
 const howSteps = [
   { n: "1", title: "Identifiera din åtgärd", text: "Välj vad du vill bygga – tillbyggnad, garage, altan eller annat. Vi guidar dig till rätt kategori." },
-  { n: "2", title: "Kontrollera regler i din kommun", text: "Regler kan variera. Hitta exakt information för din kommun bland våra 290 kommunguider." },
+  { n: "2", title: "Kontrollera regler i din kommun", text: "Regler kan variera. Hitta exakt information för din kommun bland våra kommunguider." },
   { n: "3", title: "Ansök eller anmäl", text: "Lär dig hur du fyller i ansökan korrekt, vilka handlingar som krävs och hur lång handläggningstiden är." },
   { n: "4", title: "Få hjälp av en konsult", text: "Tveksam? Matcha med en lokal bygglovskonsult som hjälper dig hela vägen – kostnadsfri offert." },
 ];
@@ -52,6 +38,16 @@ const websiteSchema = {
 };
 
 export default function HomePage() {
+  const atgarder = getAtgarderGrid();
+  const kommunCount = getAllKommuner().length;
+
+  const stats = [
+    { value: `${kommunCount}`, label: "Kommunguider" },
+    { value: `${atgarder.length}`, label: "Åtgärdstyper" },
+    { value: "Gratis", label: "Konsultmatchning" },
+    { value: "24h", label: "Svarstid" },
+  ];
+
   return (
     <>
       <script
@@ -79,7 +75,7 @@ export default function HomePage() {
             <div className="animate-fade-in-up">
               <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-4 py-1.5 text-sm font-medium mb-6">
                 <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-                Täcker alla 290 kommuner i Sverige
+                Täcker {kommunCount} av {TOTALA_KOMMUNER} kommuner i Sverige
               </div>
               <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold leading-[1.1] mb-6">
                 Allt om <br />
@@ -141,7 +137,7 @@ export default function HomePage() {
                 <h3 className="font-display font-semibold text-slate-900 text-sm group-hover:text-brand-700 transition-colors">
                   {a.label}
                 </h3>
-                <p className="text-xs text-slate-500 mt-1">{a.desc}</p>
+                <p className="text-xs text-slate-500 mt-1">{a.shortDesc}</p>
               </Link>
             ))}
           </div>
@@ -189,7 +185,7 @@ export default function HomePage() {
               Hitta din kommuns bygglovsregler
             </h2>
             <p className="text-slate-600 max-w-xl mx-auto">
-              Regler, avgifter, handläggningstider och kontaktuppgifter för alla 290 kommuner.
+              Regler, avgifter, handläggningstider och kontaktuppgifter – {kommunCount} av {TOTALA_KOMMUNER} kommuner.
             </p>
           </div>
 
@@ -197,7 +193,7 @@ export default function HomePage() {
             {storstader.map((k) => (
               <Link
                 key={k}
-                href={`/kommun/${k.toLowerCase().replace("ö", "o").replace("ä", "a").replace("å", "a")}`}
+                href={`/kommun/${normalizeKommunSlug(k)}`}
                 className="px-4 py-2 bg-brand-50 hover:bg-brand-100 text-brand-800 text-sm font-medium rounded-lg border border-brand-100 transition-colors"
               >
                 {k}
@@ -207,7 +203,7 @@ export default function HomePage() {
 
           <div className="text-center">
             <Link href="/kommun" className="btn-primary">
-              Visa alla 290 kommuner
+              Visa alla kommuner
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M1 8H15M9 2L15 8L9 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
             </Link>
           </div>

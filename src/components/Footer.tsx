@@ -1,4 +1,7 @@
 import Link from "next/link";
+import { getAllKommuner } from "@/lib/content";
+
+const TOTALA_KOMMUNER = 290;
 
 const atgarder = [
   { href: "/atgard/attefallsatgard", label: "Attefallsåtgärder" },
@@ -10,7 +13,7 @@ const atgarder = [
 ];
 
 const guider = [
-  { href: "/guide/nya-bygglovsregler-2025-2026", label: "Nya regler 2026 (PBL-reformen)" },
+  { href: "/guide/nya-regler-2026", label: "Nya regler 2026 (PBL-reformen)" },
   { href: "/guide/bygglov-i-efterhand", label: "Bygglov i efterhand" },
   { href: "/kalkylator", label: "Bygglovskalkylator" },
   { href: "/guide/ansokan", label: "Ansöka om bygglov" },
@@ -27,6 +30,7 @@ const storstader = [
 ];
 
 export default function Footer() {
+  const kommunCount = getAllKommuner().length;
   return (
     <footer className="bg-brand-950 text-white mt-20">
       <div className="container-wide py-14">
@@ -44,7 +48,7 @@ export default function Footer() {
               </span>
             </Link>
             <p className="text-slate-400 text-sm leading-relaxed">
-              Sveriges mest kompletta guide till bygglov. Information för alla 290 kommuner.
+              En oberoende guide till bygglov i Sverige. Information för {kommunCount} av {TOTALA_KOMMUNER} kommuner.
             </p>
             <div className="mt-5 flex items-center gap-2 text-xs text-slate-500">
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="currentColor" strokeWidth="1.5"/><path d="M7 4v3l2 2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
@@ -93,7 +97,7 @@ export default function Footer() {
               ))}
               <li>
                 <Link href="/kommun" className="text-brand-400 hover:text-brand-300 text-sm font-medium transition-colors">
-                  Alla 290 kommuner →
+                  Alla kommuner →
                 </Link>
               </li>
             </ul>
