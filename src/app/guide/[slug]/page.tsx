@@ -7,6 +7,7 @@ import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
 import LeadForm from "@/components/LeadForm";
+import { getAtgarderGrid } from "@/lib/atgarder";
 import { mdxComponents } from "@/components/mdx-components";
 
 interface GuideFrontmatter {
@@ -191,15 +192,11 @@ export default async function GuidePage({ params }: Props) {
 
             <aside className="lg:sticky lg:top-24 space-y-5">
               <LeadForm source={`guide-${slug}`} compact />
+              {/* Drivs av getAtgarderGrid() så att alla åtgärdssidor länkas in, inte bara fyra. */}
               <div className="card p-5">
-                <h3 className="font-display font-semibold text-slate-900 mb-3">Populära åtgärder</h3>
+                <h3 className="font-display font-semibold text-slate-900 mb-3">Åtgärdstyper</h3>
                 <div className="space-y-2">
-                  {[
-                    { slug: "tillbyggnad", label: "Tillbyggnad" },
-                    { slug: "attefallsatgard", label: "Attefallsåtgärder" },
-                    { slug: "carport-garage", label: "Carport & Garage" },
-                    { slug: "altan-uteplats", label: "Altan & Uteplats" },
-                  ].map((a) => (
+                  {getAtgarderGrid().map((a) => (
                     <Link key={a.slug} href={`/atgard/${a.slug}`} className="block text-sm text-brand-700 hover:text-brand-900 hover:underline">
                       {a.label} →
                     </Link>

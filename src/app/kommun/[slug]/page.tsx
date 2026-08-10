@@ -3,7 +3,8 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { MDXRemote } from "next-mdx-remote/rsc";
 import remarkGfm from "remark-gfm";
-import { getKommun, getAllKommuner } from "@/lib/content";
+import { getKommun, getAllKommuner, kommunGenitiv } from "@/lib/content";
+import { getAtgarderGrid } from "@/lib/atgarder";
 import LeadForm from "@/components/LeadForm";
 import { mdxComponents } from "@/components/mdx-components";
 import { Icon } from "@/lib/icons";
@@ -17,18 +18,38 @@ export async function generateStaticParams() {
   return kommuner.map((k) => ({ slug: k.slug }));
 }
 
+/**
+ * Title och description byggs i mallen – inte från frontmatter – så att alla
+ * kommunsidor följer samma sökintent-mönster ("bygglov <kommun>", "bygglov
+ * <kommun> kostnad", "tillbyggnad <kommun>") utan att 289 MDX-filer behöver
+ * hållas i synk. Inga superlativ och inga belopp: avgiften sätts av kommunens
+ * taxa och får inte utlovas här.
+ */
+function seoTitle(kommunNamn: string): string {
+  return `Bygglov i ${kommunNamn} 2026 – regler, ansökan och kostnad`;
+}
+
+function seoDescription(kommunNamn: string): string {
+  return (
+    `Bygglov i ${kommunNamn} – vad som kräver lov enligt reglerna från 1 december 2025. ` +
+    `Tillbyggnad, altan och attefallsåtgärder, ansökan steg för steg och vad det kostar.`
+  );
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const data = getKommun(slug);
   if (!data) return {};
   const { frontmatter: fm } = data;
+  const title = seoTitle(fm.kommunNamn);
+  const description = seoDescription(fm.kommunNamn);
   return {
-    title: fm.title,
-    description: fm.description,
+    title,
+    description,
     alternates: { canonical: `https://bygglov24.se/kommun/${slug}` },
     openGraph: {
-      title: fm.title,
-      description: fm.description,
+      title,
+      description,
       type: "article",
       publishedTime: fm.publishedAt,
       modifiedTime: fm.updatedAt,
@@ -42,6 +63,7 @@ export default async function KommunPage({ params }: Props) {
   if (!data) notFound();
 
   const { frontmatter: fm, content } = data;
+  const atgarder = getAtgarderGrid();
 
   const breadcrumbSchema = {
     "@context": "https://schema.org",
@@ -116,24 +138,29 @@ export default async function KommunPage({ params }: Props) {
               <div className="card p-6 mb-8 bg-brand-50 border-brand-100">
                 <h2 className="font-display font-semibold text-slate-900 mb-4">Snabbinformation</h2>
                 <div className="grid sm:grid-cols-2 gap-4">
-                  {fm.handlaggningstid && (
-                    <div className="flex items-start gap-3">
-                      <Icon name="clock" className="w-6 h-6 text-brand-600 shrink-0" />
-                      <div>
-                        <div className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-0.5">Handläggningstid</div>
-                        <div className="font-semibold text-slate-900 text-sm">{fm.handlaggningstid}</div>
-                      </div>
+                  {/*
+                    Handläggningstid och avgift är medvetet INTE kommunspecifika värden.
+                    Tiden är den lagstadgade fristen i PBL 9 kap. 27 §; avgiften sätts av
+                    varje kommuns egen taxa och får inte anges som ett belopp här.
+                  */}
+                  <div className="flex items-start gap-3">
+                    <Icon name="clock" className="w-6 h-6 text-brand-600 shrink-0" />
+                    <div>
+                      <div className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-0.5">Handläggningstid</div>
+                      <div className="font-semibold text-slate-900 text-sm">Normalt inom 10 veckor</div>
+                      <div className="text-xs text-slate-600 mt-0.5">från komplett ansökan (PBL 9 kap. 27 §)</div>
                     </div>
-                  )}
-                  {fm.avgiftEnkel && (
-                    <div className="flex items-start gap-3">
-                      <Icon name="coins" className="w-6 h-6 text-brand-600 shrink-0" />
-                      <div>
-                        <div className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-0.5">Avgift (enkel åtgärd)</div>
-                        <div className="font-semibold text-slate-900 text-sm">{fm.avgiftEnkel}</div>
-                      </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <Icon name="coins" className="w-6 h-6 text-brand-600 shrink-0" />
+                    <div>
+                      <div className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-0.5">Avgift</div>
+                      <div className="font-semibold text-slate-900 text-sm">Enligt {kommunGenitiv(fm.kommunNamn)} bygglovstaxa</div>
+                      <Link href="/kalkylator" className="text-xs text-brand-600 hover:text-brand-800 underline mt-0.5 inline-block">
+                        Uppskatta kostnaden
+                      </Link>
                     </div>
-                  )}
+                  </div>
                   {fm.telefonByggnadskontor && (
                     <div className="flex items-start gap-3">
                       <Icon name="phone" className="w-6 h-6 text-brand-600 shrink-0" />
@@ -191,17 +218,19 @@ export default async function KommunPage({ params }: Props) {
             <aside className="lg:sticky lg:top-24 space-y-5">
               <LeadForm source={`kommun-${slug}`} kommun={fm.kommunNamn} compact />
 
+              {/*
+                Åtgärdslistan drivs av getAtgarderGrid() i stället för en handplockad
+                lista, så att varje ny /atgard/-sida länkas in från alla kommunsidor
+                automatiskt i stället för att bli osynlig.
+              */}
               <div className="card p-5">
-                <h3 className="font-display font-semibold text-slate-900 mb-3">Relaterade åtgärder</h3>
+                <h3 className="font-display font-semibold text-slate-900 mb-3">
+                  Åtgärder – vad gäller i {fm.kommunNamn}?
+                </h3>
                 <div className="space-y-2">
-                  {[
-                    { href: "/atgard/attefallsatgard", label: "Attefallsåtgärder" },
-                    { href: "/atgard/tillbyggnad", label: "Tillbyggnad" },
-                    { href: "/atgard/carport-garage", label: "Carport & Garage" },
-                    { href: "/atgard/altan-uteplats", label: "Altan & Uteplats" },
-                  ].map((item) => (
-                    <Link key={item.href} href={item.href} className="flex items-center gap-2 text-sm text-slate-700 hover:text-brand-700 py-1 transition-colors">
-                      <span className="text-brand-500">→</span> {item.label}
+                  {atgarder.map((a) => (
+                    <Link key={a.slug} href={`/atgard/${a.slug}`} className="flex items-center gap-2 text-sm text-slate-700 hover:text-brand-700 py-1 transition-colors">
+                      <span className="text-brand-500">→</span> {a.label}
                     </Link>
                   ))}
                 </div>
@@ -215,6 +244,8 @@ export default async function KommunPage({ params }: Props) {
                     { href: "/guide/nya-regler-2026", label: "Nya regler 2026" },
                     { href: "/guide/kostnad", label: "Vad kostar bygglov?" },
                     { href: "/guide/detaljplan", label: "Förstå detaljplanen" },
+                    { href: "/guide/byggsanktionsavgift", label: "Byggsanktionsavgift" },
+                    { href: "/guide/bygglov-i-efterhand", label: "Bygglov i efterhand" },
                   ].map((item) => (
                     <Link key={item.href} href={item.href} className="flex items-center gap-2 text-sm text-slate-700 hover:text-brand-700 py-1 transition-colors">
                       <span className="text-brand-500">→</span> {item.label}

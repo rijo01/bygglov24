@@ -15,6 +15,14 @@ export function normalizeKommunSlug(namn: string): string {
     .replace(/\s+/g, "-");
 }
 
+/**
+ * Svensk genitiv av ett kommunnamn: "Uppsala" → "Uppsalas", men namn som redan
+ * slutar på s/x/z får ingen extra genitiv-s ("Alingsås", "Kalix", "Västerås").
+ */
+export function kommunGenitiv(namn: string): string {
+  return /[sxz]$/i.test(namn) ? namn : `${namn}s`;
+}
+
 export interface AtgardFrontmatter {
   title: string;
   slug: string;
@@ -37,8 +45,6 @@ export interface KommunFrontmatter {
   description: string;
   telefonByggnadskontor?: string;
   webbplatsByggnadskontor?: string;
-  handlaggningstid?: string;
-  avgiftEnkel?: string;
   publishedAt: string;
   updatedAt?: string;
   faq?: { question: string; answer: string }[];
