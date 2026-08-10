@@ -6,6 +6,7 @@ import remarkGfm from "remark-gfm";
 import { getKommun, getAllKommuner, kommunGenitiv } from "@/lib/content";
 import { getAtgarderGrid } from "@/lib/atgarder";
 import LeadForm from "@/components/LeadForm";
+import UtredningCta from "@/components/UtredningCta";
 import { mdxComponents } from "@/components/mdx-components";
 import { Icon } from "@/lib/icons";
 
@@ -212,6 +213,8 @@ export default async function KommunPage({ params }: Props) {
                   </div>
                 </div>
               )}
+
+              <UtredningCta />
             </article>
 
             {/* Sidebar */}

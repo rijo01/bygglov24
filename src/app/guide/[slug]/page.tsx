@@ -7,6 +7,7 @@ import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
 import LeadForm from "@/components/LeadForm";
+import UtredningCta from "@/components/UtredningCta";
 import { getAtgarderGrid } from "@/lib/atgarder";
 import { mdxComponents } from "@/components/mdx-components";
 
@@ -188,6 +189,8 @@ export default async function GuidePage({ params }: Props) {
                   </div>
                 </div>
               )}
+
+              <UtredningCta />
             </article>
 
             <aside className="lg:sticky lg:top-24 space-y-5">

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useState } from "react";
 
 const nav = [
+  { href: "/hjalp-med-bygglov", label: "Hjälp med bygglov" },
   { href: "/atgard", label: "Åtgärdstyper" },
   { href: "/kommun", label: "Kommuner" },
   { href: "/guide/nya-regler-2026", label: "Nya regler 2026" },

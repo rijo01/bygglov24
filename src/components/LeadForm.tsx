@@ -7,9 +7,32 @@ interface LeadFormProps {
   atgard?: string;
   kommun?: string;
   compact?: boolean;
+  /** Rubrik ovanför formuläret. Default: konsultmatchningens rubrik. */
+  heading?: string;
+  /** Brödtext under rubriken (visas endast när compact=false). */
+  intro?: string;
+  /**
+   * Styr om formuläret utlovar en kostnadsfri bedömning (badges, trust-rad,
+   * knapptext och bekräftelsetext). Sätts till false på tjänstesidan, där
+   * tjänsten har ett pris – annars skulle sidan säga både "2 950 kr" och
+   * "helt kostnadsfritt" om samma sak.
+   */
+  freeOffer?: boolean;
+  submitLabel?: string;
+  successText?: string;
 }
 
-export default function LeadForm({ source = "generic", atgard, kommun, compact = false }: LeadFormProps) {
+export default function LeadForm({
+  source = "generic",
+  atgard,
+  kommun,
+  compact = false,
+  heading,
+  intro,
+  freeOffer = true,
+  submitLabel,
+  successText,
+}: LeadFormProps) {
   const uid = useId();
   const [step, setStep] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [form, setForm] = useState({
@@ -74,7 +97,12 @@ export default function LeadForm({ source = "generic", atgard, kommun, compact =
           </svg>
         </div>
         <h3 className="font-display text-xl font-semibold text-slate-900 mb-2">Tack! Vi återkommer snart.</h3>
-        <p className="text-slate-600 text-sm">En bygglovskonsult kontaktar dig inom 1 arbetsdag med en kostnadsfri bedömning.</p>
+        <p className="text-slate-600 text-sm">
+          {successText ??
+            (freeOffer
+              ? "En bygglovskonsult kontaktar dig inom 1 arbetsdag med en kostnadsfri bedömning."
+              : "Vi hör av oss med nästa steg och bekräftar omfattningen innan något arbete påbörjas.")}
+        </p>
       </div>
     );
   }
@@ -83,22 +111,24 @@ export default function LeadForm({ source = "generic", atgard, kommun, compact =
     <div className={`card ${compact ? "p-6" : "p-8"}`}>
       {!compact && (
         <div className="mb-6">
-          <div className="flex items-center gap-2 mb-1">
-            <span className="badge bg-brand-100 text-brand-700">Kostnadsfritt</span>
-            <span className="badge bg-green-100 text-green-700">Svar inom 24h</span>
-          </div>
+          {freeOffer && (
+            <div className="flex items-center gap-2 mb-1">
+              <span className="badge bg-brand-100 text-brand-700">Kostnadsfritt</span>
+              <span className="badge bg-green-100 text-green-700">Svar inom 24h</span>
+            </div>
+          )}
           <h3 className="font-display text-2xl font-semibold text-slate-900 mt-3 mb-1">
-            Få hjälp av en bygglovskonsult
+            {heading ?? "Få hjälp av en bygglovskonsult"}
           </h3>
           <p className="text-slate-600 text-sm">
-            Beskriv ditt projekt – få en gratis bedömning av vad som krävs och vad det kostar.
+            {intro ?? "Beskriv ditt projekt – få en gratis bedömning av vad som krävs och vad det kostar."}
           </p>
         </div>
       )}
 
       {compact && (
         <h3 className="font-display text-lg font-semibold text-slate-900 mb-4">
-          Få kostnadsfri konsultation
+          {heading ?? "Få kostnadsfri konsultation"}
         </h3>
       )}
 
@@ -181,7 +211,7 @@ export default function LeadForm({ source = "generic", atgard, kommun, compact =
             </>
           ) : (
             <>
-              Skicka förfrågan gratis
+              {submitLabel ?? (freeOffer ? "Skicka förfrågan gratis" : "Skicka förfrågan")}
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M1 8H15M9 2L15 8L9 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
             </>
           )}
@@ -198,19 +228,21 @@ export default function LeadForm({ source = "generic", atgard, kommun, compact =
         </p>
       </div>
 
-      {/* Trust signals */}
-      <div className="mt-5 pt-5 border-t border-slate-100 grid grid-cols-3 gap-3 text-center">
-        {([
-          { icon: "shield-check", text: "Säker hantering" },
-          { icon: "clock", text: "Svar inom 24h" },
-          { icon: "circle-check", text: "Helt kostnadsfritt" },
-        ] as const).map((t) => (
-          <div key={t.text}>
-            <Icon name={t.icon} className="w-5 h-5 mx-auto mb-1 text-brand-600" />
-            <div className="text-xs text-slate-500">{t.text}</div>
-          </div>
-        ))}
-      </div>
+      {/* Trust signals – utelämnas när tjänsten har ett pris. */}
+      {freeOffer && (
+        <div className="mt-5 pt-5 border-t border-slate-100 grid grid-cols-3 gap-3 text-center">
+          {([
+            { icon: "shield-check", text: "Säker hantering" },
+            { icon: "clock", text: "Svar inom 24h" },
+            { icon: "circle-check", text: "Helt kostnadsfritt" },
+          ] as const).map((t) => (
+            <div key={t.text}>
+              <Icon name={t.icon} className="w-5 h-5 mx-auto mb-1 text-brand-600" />
+              <div className="text-xs text-slate-500">{t.text}</div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
