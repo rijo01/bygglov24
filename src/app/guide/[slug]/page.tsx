@@ -9,10 +9,13 @@ import matter from "gray-matter";
 import LeadForm from "@/components/LeadForm";
 import UtredningCta from "@/components/UtredningCta";
 import { getAtgarderGrid } from "@/lib/atgarder";
+import { robotsFor } from "@/lib/content";
+import { ovrigaGuider, pelarguider } from "@/lib/lankar";
 import { mdxComponents } from "@/components/mdx-components";
 
 interface GuideFrontmatter {
   title: string;
+  indexera?: boolean;
   slug: string;
   description: string;
   keywords?: string[];
@@ -85,6 +88,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: fm.title,
     description: fm.description,
     keywords: fm.keywords?.join(", "),
+    robots: robotsFor(fm),
     alternates: { canonical: canonicalFor(slug, source) },
     openGraph: {
       title: fm.title,
@@ -103,6 +107,8 @@ export default async function GuidePage({ params }: Props) {
 
   const { frontmatter: fm, content, source } = data;
   const canonical = canonicalFor(slug, source);
+  const andraGuider = ovrigaGuider(slug);
+  const pelare = pelarguider().filter((g) => g.href !== `/guide/${slug}`).slice(0, 6);
 
   const faqSchema = fm.faq?.length
     ? {
@@ -190,12 +196,44 @@ export default async function GuidePage({ params }: Props) {
                 </div>
               )}
 
+              {/*
+                Guidesidorna länkade tidigare bara till åtgärdssidor, aldrig till
+                varandra. Det här blocket knyter ihop de indexerbara guiderna så
+                att länkkraften stannar bland de omskrivna sidorna.
+              */}
+              {andraGuider.length > 0 && (
+                <div className="mt-12">
+                  <h2 className="font-display text-2xl font-bold text-slate-900 mb-6">Fler guider</h2>
+                  <div className="grid sm:grid-cols-2 gap-3">
+                    {andraGuider.map((g) => (
+                      <Link
+                        key={g.href}
+                        href={g.href}
+                        className="card p-4 text-sm text-slate-700 hover:text-brand-700 hover:border-brand-200 hover:shadow-sm transition-all"
+                      >
+                        {g.title}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <UtredningCta />
             </article>
 
             <aside className="lg:sticky lg:top-24 space-y-5">
               <LeadForm source={`guide-${slug}`} compact />
               {/* Drivs av getAtgarderGrid() så att alla åtgärdssidor länkas in, inte bara fyra. */}
+              <div className="card p-5">
+                <h3 className="font-display font-semibold text-slate-900 mb-3">Populära guider</h3>
+                <div className="space-y-2">
+                  {pelare.map((g) => (
+                    <Link key={g.href} href={g.href} className="block text-sm text-brand-700 hover:text-brand-900 hover:underline">
+                      {g.label} →
+                    </Link>
+                  ))}
+                </div>
+              </div>
               <div className="card p-5">
                 <h3 className="font-display font-semibold text-slate-900 mb-3">Åtgärdstyper</h3>
                 <div className="space-y-2">

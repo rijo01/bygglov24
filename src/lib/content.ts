@@ -23,8 +23,29 @@ export function kommunGenitiv(namn: string): string {
   return /[sxz]$/i.test(namn) ? namn : `${namn}s`;
 }
 
+/**
+ * Indexeringsgrind. Sidor är noindex tills de uttryckligen frisläppts med
+ * `indexera: true` i frontmatter — whitelist, inte blacklist, så att nya eller
+ * mallgenererade MDX-filer aldrig kan hamna i indexet av misstag. Alltid
+ * `follow`, så att länkkraft och crawl fortsätter passera genom sidorna.
+ *
+ * Samma predikat styr sitemap.ts, så sitemapen per definition bara innehåller
+ * indexerbara URL:er.
+ */
+export function arIndexerbar(fm: { indexera?: boolean }): boolean {
+  return fm.indexera === true;
+}
+
+export function robotsFor(fm: { indexera?: boolean }) {
+  return arIndexerbar(fm)
+    ? { index: true, follow: true }
+    : { index: false, follow: true };
+}
+
 export interface AtgardFrontmatter {
   title: string;
+  /** Se robotsFor(): sidan indexeras bara när denna är true. */
+  indexera?: boolean;
   slug: string;
   description: string;
   kravpaBuildlov: boolean;
@@ -39,6 +60,8 @@ export interface AtgardFrontmatter {
 
 export interface KommunFrontmatter {
   title: string;
+  /** Se robotsFor(): sidan indexeras bara när denna är true. */
+  indexera?: boolean;
   slug: string;
   kommunNamn: string;
   lan: string;
@@ -52,6 +75,8 @@ export interface KommunFrontmatter {
 
 export interface GuideFrontmatter {
   title: string;
+  /** Se robotsFor(): sidan indexeras bara när denna är true. */
+  indexera?: boolean;
   slug: string;
   description: string;
   publishedAt: string;

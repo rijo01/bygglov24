@@ -3,6 +3,7 @@ import Link from "next/link";
 import LeadForm from "@/components/LeadForm";
 import { getAllKommuner, normalizeKommunSlug } from "@/lib/content";
 import { getAtgarderGrid } from "@/lib/atgarder";
+import { pelarguider } from "@/lib/lankar";
 import { Icon } from "@/lib/icons";
 
 const TOTALA_KOMMUNER = 290;
@@ -41,6 +42,7 @@ const websiteSchema = {
 export default function HomePage() {
   const atgarder = getAtgarderGrid();
   const kommunCount = getAllKommuner().length;
+  const guider = pelarguider();
 
   const stats = [
     { value: `${kommunCount}`, label: "Kommunguider" },
@@ -146,6 +148,50 @@ export default function HomePage() {
           <div className="text-center mt-6">
             <Link href="/atgard" className="btn-secondary">
               Se alla åtgärdstyper →
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Guider ────────────────────────────────────────────────────────
+          Startsidans starkaste utgående länkar går hit: de omskrivna,
+          indexerbara guiderna. Listan kommer från pelarguider() så att den
+          aldrig kan peka på en sida som tagits ur indexet. */}
+      <section className="py-16 bg-slate-50 border-y border-slate-100">
+        <div className="container-wide">
+          <div className="text-center mb-10">
+            <h2 className="font-display text-3xl font-bold text-slate-900 mb-3">
+              Guider som förklarar reglerna
+            </h2>
+            <p className="text-slate-600 max-w-xl mx-auto">
+              Plan- och bygglagen på begriplig svenska – med paragrafhänvisningar, så att du kan kontrollera uppgifterna själv.
+            </p>
+          </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {guider.map((g) => (
+              <Link
+                key={g.href}
+                href={g.href}
+                className="card p-5 bg-white hover:shadow-md hover:border-brand-200 transition-all group"
+              >
+                <h3 className="font-display font-semibold text-slate-900 text-sm group-hover:text-brand-700 transition-colors">
+                  {g.label}
+                </h3>
+                <p className="text-xs text-slate-500 mt-1 leading-relaxed">{g.desc}</p>
+              </Link>
+            ))}
+          </div>
+
+          <div className="text-center mt-8 flex flex-wrap gap-3 justify-center">
+            <Link href="/guide" className="btn-secondary">
+              Se alla guider →
+            </Link>
+            <Link href="/kalkylator" className="btn-secondary">
+              Bygglovskalkylator →
+            </Link>
+            <Link href="/hjalp-med-bygglov" className="btn-secondary">
+              Hjälp med bygglov →
             </Link>
           </div>
         </div>

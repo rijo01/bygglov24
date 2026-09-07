@@ -3,8 +3,9 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { MDXRemote } from "next-mdx-remote/rsc";
 import remarkGfm from "remark-gfm";
-import { getKommun, getAllKommuner, kommunGenitiv } from "@/lib/content";
+import { getKommun, getAllKommuner, kommunGenitiv, robotsFor } from "@/lib/content";
 import { getAtgarderGrid } from "@/lib/atgarder";
+import { pelarguider } from "@/lib/lankar";
 import LeadForm from "@/components/LeadForm";
 import UtredningCta from "@/components/UtredningCta";
 import { mdxComponents } from "@/components/mdx-components";
@@ -47,6 +48,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title,
     description,
+    robots: robotsFor(fm),
     alternates: { canonical: `https://bygglov24.se/kommun/${slug}` },
     openGraph: {
       title,
@@ -65,6 +67,7 @@ export default async function KommunPage({ params }: Props) {
 
   const { frontmatter: fm, content } = data;
   const atgarder = getAtgarderGrid();
+  const guider = pelarguider();
 
   const breadcrumbSchema = {
     "@context": "https://schema.org",
@@ -241,15 +244,13 @@ export default async function KommunPage({ params }: Props) {
 
               <div className="card p-5">
                 <h3 className="font-display font-semibold text-slate-900 mb-3">Guider</h3>
+                {/*
+                  Kommunsidorna är noindex,follow tills de skrivits om med
+                  verifierade uppgifter. Länkarna härifrån går därför medvetet
+                  till pelarguiderna – de indexerbara sidor som ska rankas.
+                */}
                 <div className="space-y-2">
-                  {[
-                    { href: "/guide/ansokan", label: "Ansöka om bygglov" },
-                    { href: "/guide/nya-regler-2026", label: "Nya regler 2026" },
-                    { href: "/guide/kostnad", label: "Vad kostar bygglov?" },
-                    { href: "/guide/detaljplan", label: "Förstå detaljplanen" },
-                    { href: "/guide/byggsanktionsavgift", label: "Byggsanktionsavgift" },
-                    { href: "/guide/bygglov-i-efterhand", label: "Bygglov i efterhand" },
-                  ].map((item) => (
+                  {guider.map((item) => (
                     <Link key={item.href} href={item.href} className="flex items-center gap-2 text-sm text-slate-700 hover:text-brand-700 py-1 transition-colors">
                       <span className="text-brand-500">→</span> {item.label}
                     </Link>

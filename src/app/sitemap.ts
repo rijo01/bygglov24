@@ -1,12 +1,22 @@
 import { MetadataRoute } from "next";
-import { getAllAtgarder, getAllGuider, getAllKommuner } from "@/lib/content";
+import { arIndexerbar, getAllAtgarder, getAllGuider, getAllKommuner } from "@/lib/content";
 
 const BASE = "https://bygglov24.se";
 
+/**
+ * Sitemapen innehåller ENDAST indexerbara URL:er. Filtret är samma predikat
+ * (arIndexerbar) som robotsFor() i sidmallarna använder, så sitemap och
+ * robots-meta kan aldrig glida isär och Google får aldrig en sitemap som
+ * pekar på noindex-sidor.
+ *
+ * Kommun- och åtgärdssidor utan `indexera: true` ligger alltså utanför — de
+ * kommer tillbaka i takt med att FAS 2–4 skriver om dem med verifierade
+ * uppgifter och flaggan sätts.
+ */
 export default function sitemap(): MetadataRoute.Sitemap {
-  const atgarder = getAllAtgarder();
-  const guider = getAllGuider();
-  const kommuner = getAllKommuner();
+  const atgarder = getAllAtgarder().filter(arIndexerbar);
+  const guider = getAllGuider().filter(arIndexerbar);
+  const kommuner = getAllKommuner().filter(arIndexerbar);
 
   const staticPages: MetadataRoute.Sitemap = [
     { url: BASE, lastModified: new Date(), changeFrequency: "weekly", priority: 1 },
@@ -15,6 +25,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${BASE}/kommun`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.9 },
     { url: `${BASE}/hjalp-med-bygglov`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.9 },
     { url: `${BASE}/konsult`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.85 },
+    { url: `${BASE}/kalkylator`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.8 },
   ];
 
   const atgardPages: MetadataRoute.Sitemap = atgarder.map((a) => ({

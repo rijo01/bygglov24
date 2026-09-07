@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { MDXRemote } from "next-mdx-remote/rsc";
 import remarkGfm from "remark-gfm";
-import { getAtgard, getAllAtgarder } from "@/lib/content";
+import { getAtgard, getAllAtgarder, robotsFor } from "@/lib/content";
 import LeadForm from "@/components/LeadForm";
 import { mdxComponents } from "@/components/mdx-components";
 import { Icon } from "@/lib/icons";
@@ -26,6 +26,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: fm.title,
     description: fm.description,
     keywords: fm.keywords?.join(", "),
+    robots: robotsFor(fm),
     alternates: { canonical: `https://bygglov24.se/atgard/${slug}` },
     openGraph: {
       title: fm.title,
