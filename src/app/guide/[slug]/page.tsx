@@ -25,49 +25,36 @@ interface GuideFrontmatter {
 }
 
 const guidesDir = path.join(process.cwd(), "content", "guider");
-const atgarderDir = path.join(process.cwd(), "content", "atgarder");
 
-type GuideSource = "guider" | "atgarder";
-
-function getGuide(
-  slug: string
-): { frontmatter: GuideFrontmatter; content: string; source: GuideSource } | null {
-  const dirs: { path: string; source: GuideSource }[] = [
-    { path: guidesDir, source: "guider" },
-    { path: atgarderDir, source: "atgarder" },
-  ];
-  for (const { path: dir, source } of dirs) {
-    const filePath = path.join(dir, `${slug}.mdx`);
-    if (fs.existsSync(filePath)) {
-      const raw = fs.readFileSync(filePath, "utf-8");
-      const { data, content } = matter(raw);
-      return { frontmatter: data as GuideFrontmatter, content, source };
-    }
-  }
-  return null;
+/**
+ * Routen serverar ENBART content/guider. Tidigare svarade den även på
+ * åtgärds-slugs, så varje åtgärdssida fanns på två URL:er (/guide/<slug> och
+ * /atgard/<slug>) med canonical från den ena till den andra. En canonical är
+ * ett förslag till Google; dubbletten är därför borttagen här och 308:as i
+ * next.config.ts i stället.
+ */
+function getGuide(slug: string): { frontmatter: GuideFrontmatter; content: string } | null {
+  const filePath = path.join(guidesDir, `${slug}.mdx`);
+  if (!fs.existsSync(filePath)) return null;
+  const raw = fs.readFileSync(filePath, "utf-8");
+  const { data, content } = matter(raw);
+  return { frontmatter: data as GuideFrontmatter, content };
 }
 
-function canonicalFor(slug: string, source: GuideSource): string {
-  return source === "atgarder"
-    ? `https://bygglov24.se/atgard/${slug}`
-    : `https://bygglov24.se/guide/${slug}`;
+function canonicalFor(slug: string): string {
+  return `https://bygglov24.se/guide/${slug}`;
 }
 
 function getAllGuides(): GuideFrontmatter[] {
-  const seen = new Set<string>();
-  const result: GuideFrontmatter[] = [];
-  for (const dir of [guidesDir, atgarderDir]) {
-    if (!fs.existsSync(dir)) continue;
-    for (const file of fs.readdirSync(dir).filter((f) => f.endsWith(".mdx"))) {
-      const slug = file.replace(".mdx", "");
-      if (seen.has(slug)) continue;
-      seen.add(slug);
-      const raw = fs.readFileSync(path.join(dir, file), "utf-8");
+  if (!fs.existsSync(guidesDir)) return [];
+  return fs
+    .readdirSync(guidesDir)
+    .filter((f) => f.endsWith(".mdx"))
+    .map((file) => {
+      const raw = fs.readFileSync(path.join(guidesDir, file), "utf-8");
       const { data } = matter(raw);
-      result.push({ ...(data as GuideFrontmatter), slug });
-    }
-  }
-  return result;
+      return { ...(data as GuideFrontmatter), slug: file.replace(".mdx", "") };
+    });
 }
 
 interface Props {
@@ -83,13 +70,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const data = getGuide(slug);
   if (!data) return {};
-  const { frontmatter: fm, source } = data;
+  const { frontmatter: fm } = data;
   return {
     title: fm.title,
     description: fm.description,
     keywords: fm.keywords?.join(", "),
     robots: robotsFor(fm),
-    alternates: { canonical: canonicalFor(slug, source) },
+    alternates: { canonical: canonicalFor(slug) },
     openGraph: {
       title: fm.title,
       description: fm.description,
@@ -105,8 +92,8 @@ export default async function GuidePage({ params }: Props) {
   const data = getGuide(slug);
   if (!data) notFound();
 
-  const { frontmatter: fm, content, source } = data;
-  const canonical = canonicalFor(slug, source);
+  const { frontmatter: fm, content } = data;
+  const canonical = canonicalFor(slug);
   const andraGuider = ovrigaGuider(slug);
   const pelare = pelarguider().filter((g) => g.href !== `/guide/${slug}`).slice(0, 6);
 

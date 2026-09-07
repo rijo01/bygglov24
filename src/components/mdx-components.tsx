@@ -1,5 +1,6 @@
 import type { ComponentPropsWithoutRef } from "react";
 import RegelKort from "@/components/RegelKort";
+import Avgiftsfakta from "@/components/Avgiftsfakta";
 
 /**
  * Wrappar alla markdown-tabeller i en horisontellt scrollbar container så att
@@ -20,5 +21,6 @@ function MdxTable(props: ComponentPropsWithoutRef<"table">) {
  */
 export const mdxComponents = {
   RegelKort,
+  Avgiftsfakta,
   table: MdxTable,
 };

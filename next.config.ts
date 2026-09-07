@@ -29,6 +29,57 @@ const nextConfig: NextConfig = {
         destination: "/guide/nya-regler-2026",
         permanent: true,
       },
+
+      // ── Kannibaliseringssaneringen ──────────────────────────────────────
+      // Tre par konkurrerade om samma sökintent. Den starkare sidan (mest
+      // innehåll och inlänkar) behölls, unikt innehåll flyttades in, och den
+      // svagare 301:as hit. statusCode 301 i stället för permanent: true
+      // (=308) enligt uttrycklig begäran; båda är permanenta och likvärdiga
+      // för Google, 308 bevarar dessutom HTTP-metoden.
+      //   kostnad-bygglov (0 inlänkar) -> kostnad (292 inlänkar)
+      {
+        source: "/guide/kostnad-bygglov",
+        destination: "/guide/kostnad",
+        statusCode: 301,
+      },
+      //   strandskyddsdispens-2026 (2 inlänkar) -> strandskydd (267 inlänkar)
+      {
+        source: "/guide/strandskyddsdispens-2026",
+        destination: "/guide/strandskydd",
+        statusCode: 301,
+      },
+      //   pool-spa-bygglov-2026 (749 ord) -> villapool-bygglov-2026 (1816 ord)
+      {
+        source: "/guide/pool-spa-bygglov-2026",
+        destination: "/guide/villapool-bygglov-2026",
+        statusCode: 301,
+      },
+
+      // ── URL-hygien ──────────────────────────────────────────────────────
+      // Slugen innehöll ett "ä", vilket ger procent-kodade URL:er i sitemap,
+      // canonical och externa länkar. Filen är omdöpt till ASCII; ä-formen
+      // 308:as hit. Källan måste skrivas avkodad – Next matchar mot den
+      // avkodade sökvägen.
+      {
+        source: "/guide/uteplats-skärmtak-regler-2026",
+        destination: "/guide/uteplats-skarmtak-regler-2026",
+        permanent: true,
+      },
+      {
+        source: "/guide/uteplats-sk%C3%A4rmtak-regler-2026",
+        destination: "/guide/uteplats-skarmtak-regler-2026",
+        permanent: true,
+      },
+
+      // Åtgärdssidorna svarade på BÅDE /atgard/<slug> och /guide/<slug>, där
+      // /guide-varianten pekade tillbaka med canonical. En canonical är ett
+      // förslag; en 308 är ett besked. Dubbletten är därför borttagen ur
+      // guide-routen och redirectas i stället.
+      {
+        source: "/guide/:slug(attefallsatgard|tillbyggnad|carport-garage|altan-uteplats|friggebod|plank-mur|solpaneler)",
+        destination: "/atgard/:slug",
+        permanent: true,
+      },
     ];
   },
 };

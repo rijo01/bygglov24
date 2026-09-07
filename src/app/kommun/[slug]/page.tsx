@@ -144,7 +144,7 @@ export default async function KommunPage({ params }: Props) {
                 <div className="grid sm:grid-cols-2 gap-4">
                   {/*
                     Handläggningstid och avgift är medvetet INTE kommunspecifika värden.
-                    Tiden är den lagstadgade fristen i PBL 9 kap. 27 §; avgiften sätts av
+                    Tiden är den lagstadgade fristen i PBL 9 kap. 99 §; avgiften sätts av
                     varje kommuns egen taxa och får inte anges som ett belopp här.
                   */}
                   <div className="flex items-start gap-3">
@@ -152,7 +152,7 @@ export default async function KommunPage({ params }: Props) {
                     <div>
                       <div className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-0.5">Handläggningstid</div>
                       <div className="font-semibold text-slate-900 text-sm">Normalt inom 10 veckor</div>
-                      <div className="text-xs text-slate-600 mt-0.5">från komplett ansökan (PBL 9 kap. 27 §)</div>
+                      <div className="text-xs text-slate-600 mt-0.5">från komplett ansökan (PBL 9 kap. 99 §)</div>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
