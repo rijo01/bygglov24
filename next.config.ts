@@ -71,6 +71,22 @@ const nextConfig: NextConfig = {
         permanent: true,
       },
 
+      // /atgard/skarmtak har aldrig funnits som sida (404). Skärmtak är sedan
+      // 1 dec 2025 inte en egen åtgärd utan prövas som tillbyggnad enligt
+      // 9 kap. 10 § PBL, så URL:en pekas till åtgärdssidan för tillbyggnad.
+      // Inga interna länkar pekar hit; redirecten fångar externa länkar och
+      // gissade URL:er tills en granskad skärmtakssida eventuellt finns.
+      {
+        source: "/atgard/skarmtak",
+        destination: "/atgard/tillbyggnad",
+        permanent: false,
+      },
+      {
+        source: "/atgard/skärmtak",
+        destination: "/atgard/tillbyggnad",
+        permanent: false,
+      },
+
       // Åtgärdssidorna svarade på BÅDE /atgard/<slug> och /guide/<slug>, där
       // /guide-varianten pekade tillbaka med canonical. En canonical är ett
       // förslag; en 308 är ett besked. Dubbletten är därför borttagen ur
