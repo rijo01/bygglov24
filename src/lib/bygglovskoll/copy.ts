@@ -92,6 +92,15 @@ export const INTAKE_INGRESS =
   "Svara så precist du kan. Uppgifterna används för att välja rätt regelspår och skriva ett " +
   "personligt underlag. Det bindande beskedet ges av kommunen.";
 
+/**
+ * Svensk genitiv, samma regel som kommunGenitiv() i lib/content.ts. Medvetet
+ * duplicerad här: content.ts läser filsystemet och ska inte dras in i
+ * klientbundlen bara för en enradsfunktion.
+ */
+export function genitiv(namn: string): string {
+  return /[sxz]$/i.test(namn) ? namn : `${namn}s`;
+}
+
 export const B_RUBRIK = "Ditt ärende kräver en utredning";
 
 export const B_BROD =
@@ -105,7 +114,7 @@ export const B_UTREDNING =
 
 export function bGratischunk(kommun: string): string {
   return (
-    `Ta med fastighetsbeteckning till ${kommun}s byggnadsnämnd. Be dem ta ställning till ` +
+    `Ta med fastighetsbeteckning till ${genitiv(kommun)} byggnadsnämnd. Be dem ta ställning till ` +
     "(1) åtgärdens klassning, (2) om detaljplanen eller utökad lovplikt träffar, (3) strandskydd " +
     "och ev. dispens, (4) avstånd till tomtgräns och ev. grannmedgivande. Det bindande beskedet " +
     "ges av nämnden."
@@ -119,5 +128,5 @@ export const C_BROD =
   "öppet ärende, avstyckning eller frågan om ett äldre lov fortfarande gäller.";
 
 export function cHanvisning(kommun: string): string {
-  return `Hänvisning: kontakta ${kommun}s byggnadsnämnd. Fastighetsbildning hanteras av Lantmäteriet.`;
+  return `Hänvisning: kontakta ${genitiv(kommun)} byggnadsnämnd. Fastighetsbildning hanteras av Lantmäteriet.`;
 }

@@ -93,9 +93,34 @@ export default function IntegritetspolicyPage() {
             <li><strong>Offertförfrågningar</strong> – sparas i upp till 24 månader efter att ärendet avslutats, för att kunna återkomma vid följdfrågor</li>
             <li><strong>E-postkorrespondens</strong> – sparas så länge det är relevant för pågående ärenden, normalt upp till 24 månader</li>
             <li><strong>Tekniska loggar</strong> – sparas i högst 30 dagar</li>
+            <li><strong>Bygglovskoll, köplogg</strong> – sparas i högst 90 dagar</li>
           </ul>
           <p>
             Du kan när som helst begära att vi raderar dina uppgifter tidigare.
+          </p>
+
+          <h2>6 a. Bygglovskoll — vad som loggas</h2>
+          <p>
+            Bygglovskoll är en betaltjänst som ger ett skriftligt underlag. För varje genomfört köp
+            sparar vi en teknisk rad med följande, och inget mer:
+          </p>
+          <ul>
+            <li>Tidsstämpel för köpet</li>
+            <li>En envägshash av de uppgifter du fyllt i (går inte att läsa tillbaka till uppgifterna)</li>
+            <li>Triageutfall och sannolik klassning</li>
+            <li>Vilken version av vår regelbank som användes</li>
+            <li>Stripes sessions-id för betalningen</li>
+          </ul>
+          <p>
+            Vi loggar <strong>inte</strong> din fritext, din e-postadress eller fastighetsbeteckningen.
+            Uppgifterna du fyller i förs vidare till betalningssteget i en signerad, tillfällig cookie
+            som upphör efter sex timmar — vi lagrar dem inte i någon databas. Underlaget skapas i din
+            webbläsare och <strong>ingen PDF sparas hos oss</strong>. Köploggen raderas efter 90 dagar.
+          </p>
+          <p>
+            Betalningen hanteras av Stripe, som är eget personuppgiftsansvarig för
+            betalningsuppgifterna. Vi tar aldrig emot eller lagrar kortuppgifter. Kvitto skickas av
+            Stripe.
           </p>
 
           <h2>7. Dina rättigheter enligt GDPR</h2>

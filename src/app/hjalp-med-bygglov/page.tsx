@@ -44,6 +44,22 @@ export default function HjalpMedBygglovPage() {
               och driva ansökan mot kommunen.
             </p>
 
+            {/* Lättare ingång innan utredningen: 99-kronorsunderlaget. */}
+            <div className="card p-5 mb-6 bg-brand-50 border-brand-100">
+              <p className="text-slate-800 text-sm leading-relaxed">
+                <strong>Osäker? Börja med en Bygglovskoll för 99 kr.</strong> Ett personligt
+                skriftligt underlag med klassning, tillämpliga regler och en checklista mot
+                kommunen. Är ärendet för komplext säljs den inte — då hänvisar vi hit i stället.
+              </p>
+              <Link
+                href="/bygglovskoll"
+                className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand-700 hover:text-brand-900 mt-2"
+              >
+                Starta Bygglovskoll
+                <span aria-hidden="true">→</span>
+              </Link>
+            </div>
+
             {/* Tjänst 1 */}
             <div className="card p-7 mb-6">
               <div className="flex flex-wrap items-baseline justify-between gap-3 mb-4">

@@ -1,0 +1,70 @@
+import { NextRequest, NextResponse } from "next/server";
+import Stripe from "stripe";
+import { triage } from "@/lib/bygglovskoll/triage";
+import { intakeHash, signera, COOKIE_NAMN } from "@/lib/bygglovskoll/state";
+import { RULES_VERSION } from "@/lib/bygglovskoll/rules";
+import type { Intake } from "@/lib/bygglovskoll/types";
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+
+/**
+ * Skapar Checkout-sessionen. Triagen körs om på servern — klienten får aldrig
+ * avgöra att ett fall är A. Matchar inte intaket ett A-utfall med låst
+ * regelspår säljs ingenting.
+ */
+export async function POST(req: NextRequest) {
+  try {
+    const { intake, samtycken } = (await req.json()) as {
+      intake: Intake;
+      samtycken?: { vagledning?: boolean; angerratt?: boolean };
+    };
+
+    if (!samtycken?.vagledning || !samtycken?.angerratt) {
+      return NextResponse.json({ error: "Båda kryssrutorna måste vara ikryssade före köp." }, { status: 400 });
+    }
+
+    const resultat = triage(intake);
+    if (resultat.outcome !== "A" || !resultat.regelspar) {
+      // Konservativt: servern säljer aldrig ett fall som inte är A.
+      return NextResponse.json({ error: "Ärendet kvalificerar inte för Bygglovskoll.", outcome: resultat.outcome }, { status: 409 });
+    }
+
+    const priceId = process.env.STRIPE_PRICE_BYGGLOVSKOLL;
+    if (!priceId) return NextResponse.json({ error: "Pris saknas i konfigurationen." }, { status: 500 });
+
+    const bas = process.env.NEXT_PUBLIC_SITE_URL || "https://bygglov24.se";
+    const hash = intakeHash(intake);
+
+    const session = await stripe.checkout.sessions.create({
+      mode: "payment",
+      locale: "sv",
+      line_items: [{ price: priceId, quantity: 1 }],
+      success_url: `${bas}/bygglovskoll/klar?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${bas}/bygglovskoll?avbruten=1`,
+      customer_email: intake.epost || undefined,
+      metadata: {
+        intakeHash: hash,
+        rulesVersion: RULES_VERSION,
+        regelspar: resultat.regelspar,
+        classification: resultat.classification,
+      },
+    });
+
+    if (!session.url) return NextResponse.json({ error: "Kunde inte starta betalningen." }, { status: 502 });
+
+    const res = NextResponse.json({ url: session.url });
+    // Intaket följer med i en signerad, HttpOnly-cookie. Ingen databas i v1.
+    res.cookies.set(COOKIE_NAMN, signera(intake), {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge: 60 * 60 * 6,
+    });
+    return res;
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Okänt fel";
+    console.error("bygglovskoll/checkout:", message);
+    return NextResponse.json({ error: "Kunde inte starta betalningen." }, { status: 500 });
+  }
+}
