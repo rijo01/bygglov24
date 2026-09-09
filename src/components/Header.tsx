@@ -3,7 +3,6 @@ import Link from "next/link";
 import { useState } from "react";
 
 const nav = [
-  { href: "/bygglovskoll", label: "Bygglovskoll" },
   { href: "/hjalp-med-bygglov", label: "Hjälp med bygglov" },
   { href: "/atgard", label: "Åtgärdstyper" },
   { href: "/kommun", label: "Kommuner" },
@@ -12,8 +11,14 @@ const nav = [
   { href: "/konsult", label: "Hitta konsult" },
 ];
 
-export default function Header() {
+export default function Header({ visaBygglovskoll = false }: { visaBygglovskoll?: boolean }) {
   const [open, setOpen] = useState(false);
+
+  // Bygglovskoll ligger bakom en feature-flagga som bara servern kan läsa,
+  // så värdet kommer in som prop från layouten.
+  const navItems = visaBygglovskoll
+    ? [{ href: "/bygglovskoll", label: "Bygglovskoll" }, ...nav]
+    : nav;
 
   return (
     <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-[#dce8f5] shadow-sm">
@@ -33,7 +38,7 @@ export default function Header() {
 
           {/* Desktop nav */}
           <nav className="hidden md:flex items-center gap-1">
-            {nav.map((item) => (
+            {navItems.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
@@ -69,7 +74,7 @@ export default function Header() {
         {/* Mobile nav */}
         {open && (
           <div className="md:hidden py-3 border-t border-slate-100 space-y-1">
-            {nav.map((item) => (
+            {navItems.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}

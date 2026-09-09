@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import Header from "@/components/Header";
+import { bygglovskollAktiv } from "@/lib/bygglovskoll/flag";
 import Footer from "@/components/Footer";
 import { GoogleAnalytics } from "@/components/GoogleAnalytics";
 
@@ -64,7 +65,7 @@ export default function RootLayout({
       </head>
       <body className="min-h-screen flex flex-col bg-[#fafcff]">
         <GoogleAnalytics />
-        <Header />
+        <Header visaBygglovskoll={bygglovskollAktiv()} />
         <main className="flex-1">{children}</main>
         <Footer />
       </body>

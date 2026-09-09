@@ -1,5 +1,6 @@
 import { MetadataRoute } from "next";
 import { arIndexerbar, getAllAtgarder, getAllGuider, getAllKommuner } from "@/lib/content";
+import { bygglovskollAktiv } from "@/lib/bygglovskoll/flag";
 
 const BASE = "https://bygglov24.se";
 
@@ -23,11 +24,20 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${BASE}/atgard`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.9 },
     { url: `${BASE}/guide`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.9 },
     { url: `${BASE}/kommun`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.9 },
-    { url: `${BASE}/bygglovskoll`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.9 },
     { url: `${BASE}/hjalp-med-bygglov`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.9 },
     { url: `${BASE}/konsult`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.85 },
     { url: `${BASE}/kalkylator`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.8 },
   ];
+
+  // Bakom feature-flagga: får aldrig ligga i sitemapen när tjänsten är av.
+  if (bygglovskollAktiv()) {
+    staticPages.push({
+      url: `${BASE}/bygglovskoll`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.9,
+    });
+  }
 
   const atgardPages: MetadataRoute.Sitemap = atgarder.map((a) => ({
     url: `${BASE}/atgard/${a.slug}`,

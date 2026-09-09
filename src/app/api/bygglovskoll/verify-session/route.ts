@@ -7,6 +7,7 @@ import { intakeHash, verifiera, metadataTillIntake, COOKIE_NAMN } from "@/lib/by
 import { loggaKop } from "@/lib/bygglovskoll/log";
 import { RULES_VERSION } from "@/lib/bygglovskoll/rules";
 import { ATERBETALNING } from "@/lib/bygglovskoll/copy";
+import { bygglovskollAktiv } from "@/lib/bygglovskoll/flag";
 import type { Intake } from "@/lib/bygglovskoll/types";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
@@ -23,6 +24,9 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
  * Ingen PDF lagras; orienteringen byggs om vid varje anrop.
  */
 export async function GET(req: NextRequest) {
+  // Avstängd tjänst ska inte gå att nå ens via ett direkt API-anrop.
+  if (!bygglovskollAktiv()) return new NextResponse(null, { status: 404 });
+
   const sessionId = req.nextUrl.searchParams.get("session_id");
   if (!sessionId) {
     return NextResponse.json({ error: ATERBETALNING }, { status: 410 });

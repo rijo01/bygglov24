@@ -8,6 +8,8 @@ import type { Intake } from "../src/lib/bygglovskoll/types";
 
 process.env.STRIPE_SECRET_KEY = "sk_test_dummy_for_signing";
 process.env.STRIPE_PRICE_BYGGLOVSKOLL = "price_test_bygglovskoll";
+// Tjänsten ligger bakom en feature-flagga; rutten 404:ar utan den.
+process.env.BYGGLOVSKOLL_ENABLED = "true";
 
 const retrieve = vi.fn();
 
@@ -119,6 +121,17 @@ describe("verify-session utan cookie", () => {
     const { error } = await res.json();
     expect(error.toLowerCase()).not.toContain("hör av dig");
     expect(error.toLowerCase()).not.toContain("kontakta oss");
+  });
+});
+
+describe("feature-flaggan gäller även API:t", () => {
+  it("404 när flaggan är av, utan att Stripe ens kontaktas", async () => {
+    process.env.BYGGLOVSKOLL_ENABLED = "false";
+    retrieve.mockResolvedValue(session());
+    const res = await GET(req(URL_OK));
+    expect(res.status).toBe(404);
+    expect(retrieve).not.toHaveBeenCalled();
+    process.env.BYGGLOVSKOLL_ENABLED = "true";
   });
 });
 

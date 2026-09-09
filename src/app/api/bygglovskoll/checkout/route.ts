@@ -3,6 +3,7 @@ import Stripe from "stripe";
 import { triage } from "@/lib/bygglovskoll/triage";
 import { intakeHash, signera, intakeTillMetadata, COOKIE_NAMN } from "@/lib/bygglovskoll/state";
 import { RULES_VERSION } from "@/lib/bygglovskoll/rules";
+import { bygglovskollAktiv } from "@/lib/bygglovskoll/flag";
 import type { Intake } from "@/lib/bygglovskoll/types";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
@@ -13,6 +14,9 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
  * regelspår säljs ingenting.
  */
 export async function POST(req: NextRequest) {
+  // Avstängd tjänst ska inte gå att nå ens via ett direkt API-anrop.
+  if (!bygglovskollAktiv()) return new NextResponse(null, { status: 404 });
+
   try {
     const { intake, samtycken } = (await req.json()) as {
       intake: Intake;

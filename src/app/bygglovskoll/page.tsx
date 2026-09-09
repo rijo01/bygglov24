@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { notFound } from "next/navigation";
+import { bygglovskollAktiv } from "@/lib/bygglovskoll/flag";
 import { getAllKommuner } from "@/lib/content";
 import * as copy from "@/lib/bygglovskoll/copy";
 import BygglovskollForm from "./BygglovskollForm";
@@ -12,6 +14,8 @@ export const metadata: Metadata = {
 };
 
 export default function BygglovskollPage() {
+  if (!bygglovskollAktiv()) notFound();
+
   const kommuner = [...new Set(getAllKommuner().map((k) => k.kommunNamn))].sort((a, b) => a.localeCompare(b, "sv"));
   const idag = new Date().toISOString().slice(0, 10);
 

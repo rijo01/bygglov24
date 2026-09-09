@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import LeadForm from "@/components/LeadForm";
 import { Icon } from "@/lib/icons";
+import { bygglovskollAktiv } from "@/lib/bygglovskoll/flag";
 
 export const metadata: Metadata = {
   // absolute: layoutens "%s | Bygglov24.se"-mall ska inte läggas på här.
@@ -44,7 +45,10 @@ export default function HjalpMedBygglovPage() {
               och driva ansökan mot kommunen.
             </p>
 
-            {/* Lättare ingång innan utredningen: 99-kronorsunderlaget. */}
+            {/* Lättare ingång innan utredningen: 99-kronorsunderlaget.
+                Döljs helt när Bygglovskoll är avstängd — annars länkar sidan
+                till en route som 404:ar. */}
+            {bygglovskollAktiv() && (
             <div className="card p-5 mb-6 bg-brand-50 border-brand-100">
               <p className="text-slate-800 text-sm leading-relaxed">
                 <strong>Osäker? Börja med en Bygglovskoll för 99 kr.</strong> Ett personligt
@@ -59,6 +63,7 @@ export default function HjalpMedBygglovPage() {
                 <span aria-hidden="true">→</span>
               </Link>
             </div>
+            )}
 
             {/* Tjänst 1 */}
             <div className="card p-7 mb-6">
