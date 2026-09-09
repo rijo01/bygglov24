@@ -11,14 +11,27 @@ Grinden är att regelbanken vinner. Tre avvikelser hittades.
 |---|---|---|
 | «Lov giltighet 2 + 5 år … (PBL 9:43)» | Rad 13: **var 43 §, nu 115 §** | Giltighetstid används inte i v1. Ingen kod berörs, men specens paragrafhänvisning är fel. |
 | Fasadändring: bara 9 kap. 15 § och 37 § | Rad 6 bär även **17 a §** (solenergianläggning ≤ 11 kW undantagen) och **18 §** (utökad lovplikt bryter undantaget), Lag 2026:406 | Regelspåret för fasadändring nämner utökad lovplikt enligt rad 6/10. Solundantaget är **inte** utskrivet — se v2 nedan. |
-| Plank/mur: A tillåts vid «höjd ≤ 1,5 m och avstånd ≥ 4,5» | Rad 8: lov krävs över **1,8 m inom 3,6 m från byggnad**, men redan över **1,2 m längre bort** | Triagen följer specens A/B-policy (den är konservativ i rätt riktning). Men avsnitt 3 och 4 skriver ut **båda** trösklarna och säger uttryckligen att vilken som gäller beror på placeringen i förhållande till byggnaden. |
+| Plank/mur: A tillåts vid «höjd ≤ 1,5 m och avstånd ≥ 4,5» | Rad 8: lov krävs över **1,8 m inom 3,6 m från byggnad**, men redan över **1,2 m längre bort** | **Specen följs inte här.** A ges bara under **1,2 m**. Mellan 1,2 och 1,8 m blir utfallet B, eftersom intaket inte frågar efter avståndet till närmaste byggnad. Avsnitt 3 och 4 skriver ut båda trösklarna. |
 
-Den tredje är den viktigaste. Specens A-regel kan släppa igenom ett plank på
-1,5 m som står mer än 3,6 m från huset — och det är lovpliktigt enligt 9 kap.
-19 §. Intaket frågar bara efter avstånd till *tomtgräns*, inte till byggnaden.
-Produkten ger aldrig ett besked, och texten pekar ut båda trösklarna, så
-underlaget är inte felaktigt. Men vill man kunna säga något skarpare om plank
-behöver intaket en fråga om avstånd till närmaste byggnad. Lämnat till v2.
+Den tredje är den viktigaste, och den är åtgärdad. Specens A-regel släppte
+igenom ett plank på 1,5 m som står mer än 3,6 m från huset — och det är
+lovpliktigt enligt 9 kap. 19 §, eftersom gränsen där är 1,2 m. Intaket frågar
+bara efter avstånd till *tomtgräns*, inte till byggnaden.
+
+Triagen delar därför plankhöjden i tre:
+
+| Höjd | Utfall | Varför |
+|---|---|---|
+| ≤ 1,2 m | **A** | Under den lägre tröskeln i 19 §. Varken avståndsregeln i 19 § eller mur/plank-tröskeln i 34 § träffar, oavsett var på tomten planket står — byggnadsavståndet behövs inte för att svara. |
+| 1,2 – 1,8 m | **B**, orsak `PLANK_HOJD_KRAVER_BYGGNADSAVSTAND` | Mellan trösklarna. Vilken som gäller avgörs av avståndet till närmaste byggnad, som vi inte frågar efter. |
+| > 1,8 m | **B** via B13 | Över den högre tröskeln, som förut. |
+
+Följden är att **spec avsnitt 3 fall 9** (plank 1,4 m vid uteplats) numera ger
+B där specen anger A. Det är en avsiktlig avvikelse och står som kommentar i
+`tests/triage.test.ts`.
+
+Vill man kunna sälja fler plankfall behöver intaket en fråga om avstånd till
+närmaste byggnad. Då blir spannet 1,2–1,8 m avgörbart. Lämnat till v2.
 
 ## Trösklar kontra triagepolicy
 
@@ -36,18 +49,30 @@ Två av dem har inget legalt ankare alls och står som egna tal: `altanYta` (15,
 konservativ närhetsflagga, inte lagtext) och `plankMaxForA` (1,5, ur
 klassningsmatrisen).
 
-## Intake-state utan databas
+## Intake-state utan databas: metadata är källan, cookien är cache
 
-Intaket förs mellan formulär och Stripe-retur i en **signerad HttpOnly-cookie**
-(HMAC-SHA256 med en nyckel härledd ur `STRIPE_SECRET_KEY`, giltig 6 timmar).
-En hash av samma intake ligger i Checkout-sessionens metadata. Vid retur måste
-tre saker stämma innan underlaget låses upp: sessionen är `paid`, den avser rätt
-`price`, och cookiens intake hashar till samma värde som metadatan.
+**Checkout-sessionens metadata är källan.** Hela intaket utom fritexten ligger
+där, ett fält per nyckel (16 fält), plus `intakeHash`, `rulesVersion`,
+`regelspar` och `classification`. Stripe tillåter 50 nycklar à 500 tecken, så
+marginalen är god. Serialiseringen ligger i `state.ts`
+(`intakeTillMetadata` / `metadataTillIntake`) och testas tur och retur.
 
-Konsekvens att känna till: byter kunden webbläsare eller enhet mellan betalning
-och retur finns cookien inte, och underlaget kan inte visas. Rutten svarar då
-410 med en uppmaning att höra av sig. Det är en medveten kostnad för att slippa
-databas i v1.
+Följden är att **underlaget kan levereras av enbart `session_id`**. Byter kunden
+webbläsare, enhet eller nätverk mellan betalning och retur spelar ingen roll.
+
+**Cookien är bara en cache.** Den signerade HttpOnly-cookien (HMAC-SHA256 med en
+nyckel härledd ur `STRIPE_SECRET_KEY`, 6 timmar) bär det enda fält som
+medvetet hålls utanför Stripe: **fritexten**. Finns cookien och hashar dess
+intake till samma värde som `metadata.intakeHash` används den, och fritexten
+kommer med i avsnitt 1. Saknas den levereras underlaget ändå, och avsnitt 1
+skriver «Din beskrivning: —». Cookien får aldrig vara ett villkor för leverans.
+
+Fritexten hålls utanför Stripe eftersom den är det enda fältet med fri
+användartext, kan vara 500 tecken, och inte behövs för att bygga underlaget.
+
+**Felsvar.** 410 ges bara när session_id saknas, sessionen inte kan hämtas,
+eller inte är betald — och då med specens återbetalningstext, inte en uppmaning
+att höra av sig. Fel pris ger 409.
 
 Triagen körs **om på servern** både vid checkout och vid verifiering. Klienten
 kan aldrig påstå att ett fall är A.

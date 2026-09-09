@@ -54,4 +54,64 @@ export function verifiera(varde: string | undefined): Intake | null {
   }
 }
 
+/**
+ * Intaket som Stripe-metadata, ett fält per nyckel. Metadatan är källan till
+ * leveransen — cookien är bara en cache som bär fritexten. Stripe tillåter 50
+ * nycklar à 500 tecken; intaket använder 17 plus fyra egna fält.
+ *
+ * Fritexten utelämnas medvetet: den kan vara 500 tecken, den är det enda fältet
+ * med fri användartext, och den behövs inte för att bygga underlaget.
+ */
+export function intakeTillMetadata(i: Intake): Record<string, string> {
+  const v = (x: string | number | null): string => (x === null ? "" : String(x));
+  return {
+    atgard: i.atgard,
+    placering: v(i.placering),
+    yta: v(i.yta),
+    hojd: v(i.hojd),
+    langd: v(i.langd),
+    avstandTomtgrans: v(i.avstandTomtgrans),
+    fastighetstyp: i.fastighetstyp,
+    kommun: i.kommun.slice(0, 200),
+    fastighetsbeteckning: i.fastighetsbeteckning.slice(0, 200),
+    detaljplan: i.detaljplan,
+    naraVatten: i.naraVatten,
+    kulturSamfallighet: i.kulturSamfallighet,
+    befintligaKomplement: i.befintligaKomplement,
+    befintligKomplementYta: v(i.befintligKomplementYta),
+    installation: i.installation,
+    epost: i.epost.slice(0, 200),
+  };
+}
+
+/**
+ * Bygger tillbaka intaket ur metadatan. Fritexten finns inte där och blir tom
+ * — underlaget skriver då "—" i avsnitt 1, vilket är korrekt och inte en gissning.
+ */
+export function metadataTillIntake(m: Record<string, string> | null | undefined): Intake | null {
+  if (!m || !m.atgard || !m.fastighetstyp) return null;
+  const num = (s: string | undefined): number | null =>
+    s === undefined || s === "" || Number.isNaN(Number(s)) ? null : Number(s);
+  const jnv = (s: string | undefined) => (s === "ja" || s === "nej" || s === "vetej" ? s : "vetej");
+  return {
+    atgard: m.atgard as Intake["atgard"],
+    placering: (m.placering || null) as Intake["placering"],
+    yta: num(m.yta),
+    hojd: num(m.hojd),
+    langd: num(m.langd),
+    avstandTomtgrans: num(m.avstandTomtgrans),
+    fastighetstyp: m.fastighetstyp as Intake["fastighetstyp"],
+    kommun: m.kommun ?? "",
+    fastighetsbeteckning: m.fastighetsbeteckning ?? "",
+    detaljplan: jnv(m.detaljplan),
+    naraVatten: jnv(m.naraVatten),
+    kulturSamfallighet: jnv(m.kulturSamfallighet),
+    befintligaKomplement: jnv(m.befintligaKomplement),
+    befintligKomplementYta: num(m.befintligKomplementYta),
+    installation: jnv(m.installation),
+    fritext: "",
+    epost: m.epost ?? "",
+  };
+}
+
 export { COOKIE_NAMN };

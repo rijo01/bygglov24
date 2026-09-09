@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { triage } from "@/lib/bygglovskoll/triage";
-import { intakeHash, signera, COOKIE_NAMN } from "@/lib/bygglovskoll/state";
+import { intakeHash, signera, intakeTillMetadata, COOKIE_NAMN } from "@/lib/bygglovskoll/state";
 import { RULES_VERSION } from "@/lib/bygglovskoll/rules";
 import type { Intake } from "@/lib/bygglovskoll/types";
 
@@ -42,7 +42,11 @@ export async function POST(req: NextRequest) {
       success_url: `${bas}/bygglovskoll/klar?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${bas}/bygglovskoll?avbruten=1`,
       customer_email: intake.epost || undefined,
+      // Metadatan bär hela intaket utom fritexten och är källan vid leverans.
+      // Underlaget kan därmed byggas av enbart session_id, oberoende av
+      // webbläsare och enhet.
       metadata: {
+        ...intakeTillMetadata(intake),
         intakeHash: hash,
         rulesVersion: RULES_VERSION,
         regelspar: resultat.regelspar,
@@ -53,7 +57,8 @@ export async function POST(req: NextRequest) {
     if (!session.url) return NextResponse.json({ error: "Kunde inte starta betalningen." }, { status: 502 });
 
     const res = NextResponse.json({ url: session.url });
-    // Intaket följer med i en signerad, HttpOnly-cookie. Ingen databas i v1.
+    // Cookien är en cache som bär fritexten (som inte får plats i metadatan).
+    // Leveransen fungerar utan den — se verify-session.
     res.cookies.set(COOKIE_NAMN, signera(intake), {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",

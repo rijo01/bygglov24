@@ -3,27 +3,41 @@ import { cookies } from "next/headers";
 import Stripe from "stripe";
 import { triage } from "@/lib/bygglovskoll/triage";
 import { byggOrientering } from "@/lib/bygglovskoll/templates";
-import { intakeHash, verifiera, COOKIE_NAMN } from "@/lib/bygglovskoll/state";
+import { intakeHash, verifiera, metadataTillIntake, COOKIE_NAMN } from "@/lib/bygglovskoll/state";
 import { loggaKop } from "@/lib/bygglovskoll/log";
 import { RULES_VERSION } from "@/lib/bygglovskoll/rules";
+import { ATERBETALNING } from "@/lib/bygglovskoll/copy";
+import type { Intake } from "@/lib/bygglovskoll/types";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
 /**
- * Låser upp underlaget först när Stripe bekräftar att sessionen är betald och
- * avser rätt pris. Intaket kommer ur den signerade cookien och måste hasha till
- * samma värde som sessionens metadata — annars är det inte samma köp.
- * Ingen PDF lagras; orienteringen byggs om och renderas i klienten.
+ * Låser upp underlaget när Stripe bekräftar att sessionen är betald och avser
+ * rätt pris. Intaket byggs från sessionens metadata — den är källan, så
+ * leveransen fungerar i vilken webbläsare eller enhet som helst.
+ *
+ * Den signerade cookien används bara som cache: den bär fritexten, som inte
+ * skickas till Stripe. Saknas cookien levereras underlaget ändå, med fritexten
+ * tom. Den får aldrig vara ett villkor för leverans.
+ *
+ * Ingen PDF lagras; orienteringen byggs om vid varje anrop.
  */
 export async function GET(req: NextRequest) {
   const sessionId = req.nextUrl.searchParams.get("session_id");
-  if (!sessionId) return NextResponse.json({ error: "session_id saknas." }, { status: 400 });
+  if (!sessionId) {
+    return NextResponse.json({ error: ATERBETALNING }, { status: 410 });
+  }
 
   try {
-    const session = await stripe.checkout.sessions.retrieve(sessionId, { expand: ["line_items"] });
+    let session: Stripe.Checkout.Session;
+    try {
+      session = await stripe.checkout.sessions.retrieve(sessionId, { expand: ["line_items"] });
+    } catch {
+      return NextResponse.json({ error: ATERBETALNING }, { status: 410 });
+    }
 
     if (session.payment_status !== "paid") {
-      return NextResponse.json({ error: "Betalningen är inte genomförd." }, { status: 402 });
+      return NextResponse.json({ error: ATERBETALNING }, { status: 410 });
     }
 
     const forvantatPris = process.env.STRIPE_PRICE_BYGGLOVSKOLL;
@@ -32,17 +46,18 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Betalningen avser inte Bygglovskoll." }, { status: 409 });
     }
 
-    const jar = await cookies();
-    const intake = verifiera(jar.get(COOKIE_NAMN)?.value);
-    if (!intake) {
-      return NextResponse.json(
-        { error: "Underlaget kunde inte hämtas i den här webbläsaren. Kontakta oss så skickar vi det." },
-        { status: 410 },
-      );
+    // Källan: metadatan på den betalda sessionen.
+    const franMetadata = metadataTillIntake(session.metadata as Record<string, string> | null);
+    if (!franMetadata) {
+      return NextResponse.json({ error: ATERBETALNING }, { status: 410 });
     }
 
-    if (intakeHash(intake) !== session.metadata?.intakeHash) {
-      return NextResponse.json({ error: "Uppgifterna matchar inte betalningen." }, { status: 409 });
+    // Cachen: cookien bär fritexten. Används bara om den hör till samma köp.
+    let intake: Intake = franMetadata;
+    const jar = await cookies();
+    const franCookie = verifiera(jar.get(COOKIE_NAMN)?.value);
+    if (franCookie && intakeHash(franCookie) === session.metadata?.intakeHash) {
+      intake = franCookie;
     }
 
     // Triagen körs om — utfallet får aldrig komma från klienten eller cookien.
@@ -55,7 +70,7 @@ export async function GET(req: NextRequest) {
 
     loggaKop({
       ts: new Date().toISOString(),
-      intakeHash: intakeHash(intake),
+      intakeHash: session.metadata?.intakeHash ?? intakeHash(intake),
       outcome: resultat.outcome,
       classification: resultat.classification,
       rulesVersion: RULES_VERSION,
