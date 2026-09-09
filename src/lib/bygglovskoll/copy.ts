@@ -129,6 +129,38 @@ export const B_BROD =
   "orientering. I ditt fall finns minst en omständighet som vi inte kan hantera i ett " +
   "standardunderlag:";
 
+/**
+ * B2, B3 och B5 utlöses av två skilda svar — «ja» och «vet ej» — och en enda
+ * gemensam text ("… eller så är det oklart") gjorde det omöjligt att se vilket
+ * av dem som låg bakom flaggan, både för kunden och för oss. Varje flagga har
+ * därför två varianter: en som återger ett ja, en som återger ett vet ej.
+ * Orsakskoden är densamma i båda fallen; bara texten skiljer.
+ */
+export const B2_JA =
+  "Du angav att tomten ligger nära hav, sjö eller vattendrag. Strandskydd prövas separat och kan " +
+  "kräva dispens oavsett bygglovsfrågan.";
+
+export const B2_VETEJ =
+  "Du angav att du inte vet om tomten ligger nära hav, sjö eller vattendrag. Strandskydd prövas " +
+  "separat och kan kräva dispens oavsett bygglovsfrågan.";
+
+export const B3_JA =
+  "Du angav att byggnaden eller området är kulturhistoriskt utpekat, eller att fastigheten ligger " +
+  "inom samfällighet eller BRF. Det kan utlösa utökad lovplikt för åtgärder som annars inte kräver lov.";
+
+export const B3_VETEJ =
+  "Du angav att du inte vet om byggnaden eller området är kulturhistoriskt utpekat, eller om " +
+  "fastigheten ligger inom samfällighet eller BRF. Det kan utlösa utökad lovplikt för åtgärder som " +
+  "annars inte kräver lov.";
+
+export const B5_JA =
+  "Du angav att vatten, avlopp, ventilation eller eldstad installeras. Teknisk anmälan kan krävas " +
+  "även när byggnaden i sig är lovfri.";
+
+export const B5_VETEJ =
+  "Du angav att du inte vet om vatten, avlopp, ventilation eller eldstad installeras. Teknisk " +
+  "anmälan kan krävas även när byggnaden i sig är lovfri.";
+
 export const B_UTREDNING =
   "Bygglovsutredning, 2 950 kr: fastighetsspecifik genomgång av detaljplan, byggrätt, strandskydd " +
   "och en skriftlig rekommendation. Det är fortfarande vägledning — inte kommunens beslut.";

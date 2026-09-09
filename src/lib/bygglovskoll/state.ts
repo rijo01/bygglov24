@@ -1,4 +1,5 @@
 import crypto from "node:crypto";
+import { arKomplettIntake } from "./validering";
 import type { Intake } from "./types";
 
 /**
@@ -87,31 +88,38 @@ export function intakeTillMetadata(i: Intake): Record<string, string> {
 /**
  * Bygger tillbaka intaket ur metadatan. Fritexten finns inte där och blir tom
  * — underlaget skriver då "—" i avsnitt 1, vilket är korrekt och inte en gissning.
+ *
+ * Tre-lägesfälten läses ordagrant. Ett värde som inte är "ja", "nej" eller
+ * "vetej" gjorde tidigare tyst om sig till "vetej"; då hade metadatan sagt en
+ * sak och underlaget en annan. Nu går hela intaket genom samma validering som
+ * på vägen in, och ett fält vi inte kan läsa ger null i stället för ett påhittat
+ * svar. Metadatan skrivs alltid av intakeTillMetadata, så ett giltigt köp
+ * påverkas inte.
  */
 export function metadataTillIntake(m: Record<string, string> | null | undefined): Intake | null {
-  if (!m || !m.atgard || !m.fastighetstyp) return null;
+  if (!m) return null;
   const num = (s: string | undefined): number | null =>
     s === undefined || s === "" || Number.isNaN(Number(s)) ? null : Number(s);
-  const jnv = (s: string | undefined) => (s === "ja" || s === "nej" || s === "vetej" ? s : "vetej");
-  return {
-    atgard: m.atgard as Intake["atgard"],
-    placering: (m.placering || null) as Intake["placering"],
+  const kandidat = {
+    atgard: m.atgard,
+    placering: m.placering || null,
     yta: num(m.yta),
     hojd: num(m.hojd),
     langd: num(m.langd),
     avstandTomtgrans: num(m.avstandTomtgrans),
-    fastighetstyp: m.fastighetstyp as Intake["fastighetstyp"],
+    fastighetstyp: m.fastighetstyp,
     kommun: m.kommun ?? "",
     fastighetsbeteckning: m.fastighetsbeteckning ?? "",
-    detaljplan: jnv(m.detaljplan),
-    naraVatten: jnv(m.naraVatten),
-    kulturSamfallighet: jnv(m.kulturSamfallighet),
-    befintligaKomplement: jnv(m.befintligaKomplement),
+    detaljplan: m.detaljplan,
+    naraVatten: m.naraVatten,
+    kulturSamfallighet: m.kulturSamfallighet,
+    befintligaKomplement: m.befintligaKomplement,
     befintligKomplementYta: num(m.befintligKomplementYta),
-    installation: jnv(m.installation),
+    installation: m.installation,
     fritext: "",
     epost: m.epost ?? "",
   };
+  return arKomplettIntake(kandidat) ? kandidat : null;
 }
 
 export { COOKIE_NAMN };

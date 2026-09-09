@@ -5,7 +5,15 @@ import {
   TILLBYGGNAD,
   RULES_VERSION,
 } from "./rules";
-import { plankKraverByggnadsavstand } from "./copy";
+import {
+  B2_JA,
+  B2_VETEJ,
+  B3_JA,
+  B3_VETEJ,
+  B5_JA,
+  B5_VETEJ,
+  plankKraverByggnadsavstand,
+} from "./copy";
 import type { Intake, Klassning, Orsak, TriageResultat } from "./types";
 
 /**
@@ -193,19 +201,13 @@ export function triage(i: Intake): TriageResultat {
         "De lovfria reglerna för en- och tvåbostadshus gäller då inte.",
     );
   }
+  // Texten säger vilket svar som utlöste flaggan — ett ja och ett vet ej är
+  // olika uppgifter och ska inte se likadana ut för kunden.
   if (i.naraVatten === "ja" || i.naraVatten === "vetej") {
-    push(
-      "B2",
-      "Du har angett att tomten ligger nära vatten, eller att du inte vet. Strandskydd prövas " +
-        "separat och kan kräva dispens oavsett bygglovsfrågan.",
-    );
+    push("B2", i.naraVatten === "ja" ? B2_JA : B2_VETEJ);
   }
   if (i.kulturSamfallighet === "ja" || i.kulturSamfallighet === "vetej") {
-    push(
-      "B3",
-      "Fastigheten är kulturmiljö, samfällighet eller bostadsrätt — eller så är det oklart. " +
-        "Det kan utlösa utökad lovplikt för åtgärder som annars inte kräver lov.",
-    );
+    push("B3", i.kulturSamfallighet === "ja" ? B3_JA : B3_VETEJ);
   }
   if (i.avstandTomtgrans === null || i.avstandTomtgrans < GRANS.avstandTomtgrans) {
     push(
@@ -214,11 +216,7 @@ export function triage(i: Intake): TriageResultat {
     );
   }
   if (i.installation === "ja" || i.installation === "vetej") {
-    push(
-      "B5",
-      "Du har angett installation av vatten, avlopp, ventilation eller eldstad — eller så är det " +
-        "oklart. Teknisk anmälan kan krävas även när byggnaden i sig är lovfri.",
-    );
+    push("B5", i.installation === "ja" ? B5_JA : B5_VETEJ);
   }
   if (i.placering === "oklart") {
     push(

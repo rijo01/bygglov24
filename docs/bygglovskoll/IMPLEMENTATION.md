@@ -77,6 +77,31 @@ att höra av sig. Fel pris ger 409.
 Triagen körs **om på servern** både vid checkout och vid verifiering. Klienten
 kan aldrig påstå att ett fall är A.
 
+## Obesvarat får aldrig bli «vet ej»
+
+Triagen är konservativ men tyst: ett tre-lägesfält som varken är `ja`, `nej`
+eller `vetej` faller ur alla grenar och landar i B-fallbacken. Kunden ser då en
+utredningshänvisning utan att veta att en fråga aldrig kom fram — och eftersom
+B2, B3 och B5 tidigare delade en text som täckte både ja och vet ej gick det
+inte att läsa sig till vilket svar som utlöste flaggan.
+
+Tre spärrar, alla på plats:
+
+1. **Formuläret** har inget förval på de tre frågorna och listar i klartext vad
+   som saknas i steget, i stället för att bara stänga av knappen.
+2. **`felIIntake()`** (`lib/bygglovskoll/validering.ts`) är kontraktet mellan
+   formulär och triage. Checkout-rutten kör den före `triage()` och svarar 400
+   med `kod: "OFULLSTANDIGT_INTAKE"` och frågan som saknas. Samma funktion
+   validerar intaket som byggs tillbaka ur Stripe-metadatan vid leverans —
+   `metadataTillIntake()` hittar inte längre på `vetej` för ett fält den inte
+   kan läsa, utan returnerar null.
+3. **`tests/intake-integration.test.ts`** kör rutthanteraren med exakt den
+   payload formuläret skickar. Triagetesterna anropar `triage()` direkt och
+   säger därför ingenting om vad som når den efter state, JSON och rutt.
+
+409-svaret från checkout bär numera `reasons` med orsakskoderna, så att det går
+att se vilken flagga som stoppade köpet utan att gissa ur texten.
+
 ## Loggning
 
 `log.ts` skriver en strukturerad rad till stdout per genomfört köp:

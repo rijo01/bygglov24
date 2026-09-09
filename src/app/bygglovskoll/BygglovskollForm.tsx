@@ -122,16 +122,34 @@ export default function BygglovskollForm({ kommuner }: { kommuner: string[] }) {
   const behoverMatt = i.atgard !== "fasadandring";
   const idag = new Date().toISOString().slice(0, 10);
 
-  const kanGaVidare = useMemo(() => {
-    if (steg === 1) return i.atgard !== "tillbyggnad" || i.placering !== null;
-    if (steg === 2) return !behoverMatt || (i.yta !== null || i.hojd !== null);
-    if (steg === 3) return i.kommun.trim().length > 0 && i.naraVatten !== null && i.kulturSamfallighet !== null;
-    if (steg === 4)
-      return (
-        i.installation !== null && /.+@.+\..+/.test(i.epost) && i.fritext.length <= 500
-      );
-    return false;
+  /**
+   * Vad som saknas i det aktuella steget, i klartext. En avstängd knapp utan
+   * förklaring läser sig som ett fel i sidan; de tre tvingande frågorna måste
+   * dessutom synas som frågor kunden själv ska svara på, inte som något vi
+   * tolkar åt hen.
+   */
+  const saknas = useMemo(() => {
+    const fel: string[] = [];
+    if (steg === 1 && i.atgard === "tillbyggnad" && i.placering === null) {
+      fel.push("Ange om åtgärden är fäst i huset eller fristående.");
+    }
+    if (steg === 2 && behoverMatt && i.yta === null && i.hojd === null) {
+      fel.push("Ange yta eller höjd.");
+    }
+    if (steg === 3) {
+      if (i.kommun.trim().length === 0) fel.push("Ange kommun.");
+      if (i.naraVatten === null) fel.push("Svara på frågan om närhet till hav, sjö eller vattendrag.");
+      if (i.kulturSamfallighet === null) fel.push("Svara på frågan om kulturmiljö, samfällighet eller BRF.");
+    }
+    if (steg === 4) {
+      if (i.installation === null) fel.push("Svara på frågan om vatten, avlopp, ventilation eller eldstad.");
+      if (!/.+@.+\..+/.test(i.epost)) fel.push("Ange en giltig e-postadress.");
+      if (i.fritext.length > 500) fel.push("Beskrivningen får vara högst 500 tecken.");
+    }
+    return fel;
   }, [steg, i, behoverMatt]);
+
+  const kanGaVidare = saknas.length === 0;
 
   /** Utkastet är komplett först när de tre tvingande frågorna är besvarade. */
   const somIntake = (u: Utkast): Intake | null =>
@@ -147,13 +165,18 @@ export default function BygglovskollForm({ kommuner }: { kommuner: string[] }) {
   };
 
   const betala = async () => {
+    const komplett = somIntake(i);
+    if (!komplett) {
+      setFel("Något av svaren saknas. Gå tillbaka och komplettera formuläret.");
+      return;
+    }
     setLaddar(true);
     setFel(null);
     try {
       const res = await fetch("/api/bygglovskoll/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ intake: somIntake(i), samtycken: { vagledning: kryssVagledning, angerratt: kryssAngerratt } }),
+        body: JSON.stringify({ intake: komplett, samtycken: { vagledning: kryssVagledning, angerratt: kryssAngerratt } }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Kunde inte starta betalningen.");
@@ -385,6 +408,19 @@ export default function BygglovskollForm({ kommuner }: { kommuner: string[] }) {
           </Falt>
         </>
       )}
+
+      <div aria-live="polite">
+        {saknas.length > 0 && (
+          <ul className="mt-6 space-y-1 text-sm text-slate-600">
+            {saknas.map((f) => (
+              <li key={f} className="flex gap-2">
+                <span aria-hidden="true">•</span>
+                <span>{f}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
 
       <div className="flex gap-3 mt-8">
         {steg > 1 && (

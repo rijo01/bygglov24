@@ -4,6 +4,7 @@ import { triage } from "@/lib/bygglovskoll/triage";
 import { intakeHash, signera, intakeTillMetadata, COOKIE_NAMN } from "@/lib/bygglovskoll/state";
 import { RULES_VERSION } from "@/lib/bygglovskoll/rules";
 import { bygglovskollAktiv } from "@/lib/bygglovskoll/flag";
+import { felIIntake } from "@/lib/bygglovskoll/validering";
 import type { Intake } from "@/lib/bygglovskoll/types";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
@@ -27,10 +28,23 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Båda kryssrutorna måste vara ikryssade före köp." }, { status: 400 });
     }
 
+    // Ett obesvarat fält får aldrig tolkas som "vet ej" och tyst bli B — då ser
+    // varken kunden eller vi att frågan aldrig kom fram. Det är ett fel.
+    const fel = felIIntake(intake);
+    if (fel) return NextResponse.json({ error: fel, kod: "OFULLSTANDIGT_INTAKE" }, { status: 400 });
+
     const resultat = triage(intake);
     if (resultat.outcome !== "A" || !resultat.regelspar) {
-      // Konservativt: servern säljer aldrig ett fall som inte är A.
-      return NextResponse.json({ error: "Ärendet kvalificerar inte för Bygglovskoll.", outcome: resultat.outcome }, { status: 409 });
+      // Konservativt: servern säljer aldrig ett fall som inte är A. Koderna
+      // följer med så att det går att se vilken flagga som stoppade köpet.
+      return NextResponse.json(
+        {
+          error: "Ärendet kvalificerar inte för Bygglovskoll.",
+          outcome: resultat.outcome,
+          reasons: resultat.reasons.map((r) => r.kod),
+        },
+        { status: 409 },
+      );
     }
 
     const priceId = process.env.STRIPE_PRICE_BYGGLOVSKOLL;
