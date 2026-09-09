@@ -57,7 +57,9 @@ function bas(over: Partial<Intake> = {}): Intake {
 const A_FALL: Array<[string, Intake]> = [
   ["komplementbyggnad", bas()],
   ["tillbyggnad", bas({ atgard: "tillbyggnad", placering: "fast", yta: 18, hojd: 3.2 })],
-  ["plank_mur", bas({ atgard: "plank", placering: null, yta: null, hojd: 1.4, langd: 8 })],
+  // 1,1 m ligger under den lägre tröskeln i 19 § och är därför A utan att
+  // avståndet till närmaste byggnad behöver vara känt.
+  ["plank_mur", bas({ atgard: "plank", placering: null, yta: null, hojd: 1.1, langd: 8 })],
   ["fasadandring", bas({ atgard: "fasadandring", placering: null, yta: null, hojd: null })],
   ["komplementbyggnad utanför dp", bas({ detaljplan: "nej", yta: 15, hojd: 3.8 })],
   ["komplementbyggnad vet ej dp", bas({ detaljplan: "vetej" })],

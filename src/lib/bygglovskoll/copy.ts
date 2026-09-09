@@ -101,6 +101,27 @@ export function genitiv(namn: string): string {
   return /[sxz]$/i.test(namn) ? namn : `${namn}s`;
 }
 
+/**
+ * Plank och mur har två trösklar i PBL 9 kap. 19 §, och vilken som gäller
+ * avgörs av avståndet till närmaste byggnad — en uppgift intaket inte frågar
+ * efter. Mellan de två trösklarna går utfallet därför inte att avgöra.
+ * Siffrorna kommer ur regelbanken, aldrig härifrån.
+ */
+export function plankKraverByggnadsavstand(
+  hojdNaraByggnad: number,
+  avstandNaraByggnad: number,
+  hojdLangreBort: number,
+): string {
+  const n = (v: number) => v.toFixed(1).replace(".", ",");
+  return (
+    `Lovplikten för plank och mur beror på avståndet till närmaste byggnad. Inom ` +
+    `${n(avstandNaraByggnad)} m från en byggnad går gränsen vid ${n(hojdNaraByggnad)} m, längre bort ` +
+    `redan vid ${n(hojdLangreBort)} m (PBL 9 kap. 19 §). Din angivna höjd ligger mellan de två ` +
+    `trösklarna, och vi frågar inte efter avståndet till byggnaden. Utan den uppgiften går det inte ` +
+    `att avgöra vilken tröskel som gäller för ditt plank.`
+  );
+}
+
 export const B_RUBRIK = "Ditt ärende kräver en utredning";
 
 export const B_BROD =

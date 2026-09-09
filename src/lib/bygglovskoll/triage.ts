@@ -5,6 +5,7 @@ import {
   TILLBYGGNAD,
   RULES_VERSION,
 } from "./rules";
+import { plankKraverByggnadsavstand } from "./copy";
 import type { Intake, Klassning, Orsak, TriageResultat } from "./types";
 
 /**
@@ -31,8 +32,6 @@ const NARHET = {
   plankHojdMarginal: 0.2,
   /** B12: konservativ flagga som ärvts från den upphävda skärmtaksregeln. */
   altanYta: 15.0,
-  /** Klassningsmatrisen 2.3: A för plank kräver tydligt under 1,8. */
-  plankMaxForA: 1.5,
 } as const;
 
 const C_NYCKELORD = [
@@ -289,10 +288,23 @@ export function triage(i: Intake): TriageResultat {
     }
   }
 
-  // B13 — plank/mur.
+  // B13 — plank/mur, nära eller över den högre tröskeln.
   if (i.atgard === "plank" && hojd !== null) {
     if (hojd >= MUR_PLANK.hojdInomNaraByggnad - NARHET.plankHojdMarginal) {
       push("B13", "Höjden ligger nära eller över tröskeln där plank och mur kräver bygglov.");
+    }
+    // Mellan den lägre och den högre tröskeln avgörs lovplikten av avståndet
+    // till närmaste byggnad — en uppgift intaket inte samlar in. Då gissar vi
+    // inte, utan hänvisar till utredning.
+    if (hojd > MUR_PLANK.hojdLangreBort && hojd <= MUR_PLANK.hojdInomNaraByggnad) {
+      push(
+        "PLANK_HOJD_KRAVER_BYGGNADSAVSTAND",
+        plankKraverByggnadsavstand(
+          MUR_PLANK.hojdInomNaraByggnad,
+          MUR_PLANK.avstandNaraByggnad,
+          MUR_PLANK.hojdLangreBort,
+        ),
+      );
     }
   }
 
@@ -349,9 +361,12 @@ export function triage(i: Intake): TriageResultat {
     i.installation === "nej";
 
   // Klassningsmatrisens egna A-villkor utöver B-raderna.
+  // Plank: A bara under den lägre tröskeln i 19 §. Där träffar varken
+  // avståndsregeln i 19 § eller mur/plank-tröskeln i 34 §, oavsett var på
+  // tomten planket står — då behövs inget byggnadsavstånd för att svara.
   const matrisTillaterA =
     klassning === "plank_mur"
-      ? hojd !== null && hojd <= NARHET.plankMaxForA
+      ? hojd !== null && hojd <= MUR_PLANK.hojdLangreBort
       : klassning === "tillbyggnad" || klassning === "komplementbyggnad" || klassning === "fasadandring";
 
   if (villkorA && matrisTillaterA) {
