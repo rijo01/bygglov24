@@ -42,6 +42,17 @@ describe("flaggan av", () => {
     expect(urls.length).toBeGreaterThan(10);
   });
 
+  it("sitemapen innehåller /konsult", async () => {
+    const { default: sitemap } = await import("../src/app/sitemap");
+    expect(sitemap().map((e) => e.url)).toContain("https://bygglov24.se/konsult");
+  });
+
+  it("MDX-CTA:erna lämnas orörda", async () => {
+    const { saneraKonsultCta } = await import("../src/lib/cta");
+    const mdx = "En lokal bygglovskonsult. [Begär en kostnadsfri konsultbedömning](/konsult) – svar inom 24 timmar.";
+    expect(saneraKonsultCta(mdx)).toBe(mdx);
+  });
+
   it("hjälpfunktionen returnerar false även för avvikande värden", async () => {
     for (const v of ["", "false", "1", "TRUE", "yes", " true"]) {
       vi.resetModules();
@@ -71,5 +82,24 @@ describe("flaggan på", () => {
   it("sitemapen innehåller posten", async () => {
     const { default: sitemap } = await import("../src/app/sitemap");
     expect(sitemap().map((e) => e.url)).toContain("https://bygglov24.se/bygglovskoll");
+  });
+
+  it("sitemapen saknar /konsult, som redirectar", async () => {
+    const { default: sitemap } = await import("../src/app/sitemap");
+    expect(sitemap().map((e) => e.url)).not.toContain("https://bygglov24.se/konsult");
+  });
+
+  it("/konsult redirectar i stället för att rendera", async () => {
+    const { default: Page } = await import("../src/app/konsult/page");
+    // redirect() kastar ett NEXT_REDIRECT-fel.
+    expect(() => Page()).toThrowError(/NEXT_REDIRECT|redirect/i);
+  });
+
+  it("MDX-CTA:erna saneras", async () => {
+    const { saneraKonsultCta } = await import("../src/lib/cta");
+    const mdx = "En lokal bygglovskonsult. [Begär en kostnadsfri konsultbedömning](/konsult) – svar inom 24 timmar.";
+    const ut = saneraKonsultCta(mdx);
+    expect(ut).not.toContain("/konsult");
+    expect(ut).toContain("](/bygglovskoll)");
   });
 });

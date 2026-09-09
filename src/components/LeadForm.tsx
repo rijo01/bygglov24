@@ -1,23 +1,29 @@
 "use client";
 import { useId, useState } from "react";
-import { Icon } from "@/lib/icons";
+import { Icon, type IconName } from "@/lib/icons";
 
 interface LeadFormProps {
   source?: string;
   atgard?: string;
   kommun?: string;
   compact?: boolean;
-  /** Rubrik ovanför formuläret. Default: konsultmatchningens rubrik. */
+  /** Rubrik ovanför formuläret. Default: offertrubriken. */
   heading?: string;
   /** Brödtext under rubriken (visas endast när compact=false). */
   intro?: string;
   /**
-   * Styr om formuläret utlovar en kostnadsfri bedömning (badges, trust-rad,
-   * knapptext och bekräftelsetext). Sätts till false på tjänstesidan, där
-   * tjänsten har ett pris – annars skulle sidan säga både "2 950 kr" och
-   * "helt kostnadsfritt" om samma sak.
+   * Styr om badges och trust-raden visas. Sätts till false på tjänstesidan,
+   * där formuläret står under en prissatt tjänst och inte behöver upprepa
+   * att en offert är en offert.
    */
   freeOffer?: boolean;
+  /**
+   * Bygglovskoll påslagen. Styr formulärets copy: med flaggan av behålls den
+   * ursprungliga konsultmatchningstexten oförändrad, med flaggan på blir
+   * formuläret uttryckligen en offertväg utan löften om kostnadsfrihet
+   * eller svarstid. Skickas som prop eftersom komponenten är klientbunden.
+   */
+  bygglovskoll?: boolean;
   submitLabel?: string;
   successText?: string;
 }
@@ -30,6 +36,7 @@ export default function LeadForm({
   heading,
   intro,
   freeOffer = true,
+  bygglovskoll = false,
   submitLabel,
   successText,
 }: LeadFormProps) {
@@ -99,9 +106,11 @@ export default function LeadForm({
         <h3 className="font-display text-xl font-semibold text-slate-900 mb-2">Tack! Vi återkommer snart.</h3>
         <p className="text-slate-600 text-sm">
           {successText ??
-            (freeOffer
-              ? "En bygglovskonsult kontaktar dig inom 1 arbetsdag med en kostnadsfri bedömning."
-              : "Vi hör av oss med nästa steg och bekräftar omfattningen innan något arbete påbörjas.")}
+            (bygglovskoll
+              ? "Vi återkommer med omfattning och pris innan något arbete påbörjas."
+              : freeOffer
+                ? "En bygglovskonsult kontaktar dig inom 1 arbetsdag med en kostnadsfri bedömning."
+                : "Vi hör av oss med nästa steg och bekräftar omfattningen innan något arbete påbörjas.")}
         </p>
       </div>
     );
@@ -113,22 +122,31 @@ export default function LeadForm({
         <div className="mb-6">
           {freeOffer && (
             <div className="flex items-center gap-2 mb-1">
-              <span className="badge bg-brand-100 text-brand-700">Kostnadsfritt</span>
-              <span className="badge bg-green-100 text-green-700">Svar inom 24h</span>
+              {bygglovskoll ? (
+                <span className="badge bg-brand-100 text-brand-700">Offert</span>
+              ) : (
+                <>
+                  <span className="badge bg-brand-100 text-brand-700">Kostnadsfritt</span>
+                  <span className="badge bg-green-100 text-green-700">Svar inom 24h</span>
+                </>
+              )}
             </div>
           )}
           <h3 className="font-display text-2xl font-semibold text-slate-900 mt-3 mb-1">
-            {heading ?? "Få hjälp av en bygglovskonsult"}
+            {heading ?? (bygglovskoll ? "Begär offert på handlingar, ritningar eller ansökan" : "Få hjälp av en bygglovskonsult")}
           </h3>
           <p className="text-slate-600 text-sm">
-            {intro ?? "Beskriv ditt projekt – få en gratis bedömning av vad som krävs och vad det kostar."}
+            {intro ??
+              (bygglovskoll
+                ? "Beskriv uppdraget så återkommer vi med omfattning och pris innan något arbete påbörjas."
+                : "Beskriv ditt projekt – få en gratis bedömning av vad som krävs och vad det kostar.")}
           </p>
         </div>
       )}
 
       {compact && (
         <h3 className="font-display text-lg font-semibold text-slate-900 mb-4">
-          {heading ?? "Få kostnadsfri konsultation"}
+          {heading ?? (bygglovskoll ? "Begär offert" : "Få kostnadsfri konsultation")}
         </h3>
       )}
 
@@ -185,11 +203,15 @@ export default function LeadForm({
         </div>
 
         <div>
-          <label htmlFor={`${uid}-message`} className="block text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wide">Beskriv ditt projekt</label>
+          <label htmlFor={`${uid}-message`} className="block text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wide">{bygglovskoll ? "Beskriv uppdraget" : "Beskriv ditt projekt"}</label>
           <textarea
             id={`${uid}-message`}
             rows={3}
-            placeholder={`T.ex. "Vill bygga till 25 kvm på min villa i ${kommun || "Stockholm"}"...`}
+            placeholder={
+              bygglovskoll
+                ? `T.ex. "Behöver ritningar för tillbyggnad 25 kvm på villa i ${kommun || "Stockholm"}"...`
+                : `T.ex. "Vill bygga till 25 kvm på min villa i ${kommun || "Stockholm"}"...`
+            }
             value={form.message}
             onChange={(e) => setForm({ ...form, message: e.target.value })}
             className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-900 placeholder:text-slate-400 text-sm focus:border-brand-400 focus:ring-2 focus:ring-brand-100 outline-none transition-all resize-none"
@@ -211,7 +233,7 @@ export default function LeadForm({
             </>
           ) : (
             <>
-              {submitLabel ?? (freeOffer ? "Skicka förfrågan gratis" : "Skicka förfrågan")}
+              {submitLabel ?? (bygglovskoll || !freeOffer ? "Skicka förfrågan" : "Skicka förfrågan gratis")}
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M1 8H15M9 2L15 8L9 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
             </>
           )}
@@ -224,18 +246,22 @@ export default function LeadForm({
         </div>
 
         <p className="text-xs text-slate-600 text-center">
-          Genom att skicka godkänner du vår <a href="/integritetspolicy" className="underline hover:text-slate-600">integritetspolicy</a>. Inga förpliktelser.
+          Genom att skicka godkänner du vår <a href="/integritetspolicy" className="underline hover:text-slate-600">integritetspolicy</a>.{bygglovskoll ? "" : " Inga förpliktelser."}
         </p>
       </div>
 
       {/* Trust signals – utelämnas när tjänsten har ett pris. */}
       {freeOffer && (
         <div className="mt-5 pt-5 border-t border-slate-100 grid grid-cols-3 gap-3 text-center">
-          {([
+          {(([
             { icon: "shield-check", text: "Säker hantering" },
-            { icon: "clock", text: "Svar inom 24h" },
-            { icon: "circle-check", text: "Helt kostnadsfritt" },
-          ] as const).map((t) => (
+            bygglovskoll
+              ? { icon: "file-text", text: "Offert innan arbete" }
+              : { icon: "clock", text: "Svar inom 24h" },
+            bygglovskoll
+              ? { icon: "circle-check", text: "Ingen bindning till avtal" }
+              : { icon: "circle-check", text: "Helt kostnadsfritt" },
+          ] as { icon: IconName; text: string }[])).map((t) => (
             <div key={t.text}>
               <Icon name={t.icon} className="w-5 h-5 mx-auto mb-1 text-brand-600" />
               <div className="text-xs text-slate-500">{t.text}</div>

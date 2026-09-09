@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { MDXRemote } from "next-mdx-remote/rsc";
 import remarkGfm from "remark-gfm";
+import { saneraKonsultCta } from "@/lib/cta";
+import { bygglovskollAktiv } from "@/lib/bygglovskoll/flag";
 import { getKommun, getAllKommuner, kommunGenitiv, robotsFor } from "@/lib/content";
 import { getAtgarderGrid } from "@/lib/atgarder";
 import { pelarguider } from "@/lib/lankar";
@@ -192,7 +194,7 @@ export default async function KommunPage({ params }: Props) {
 
               {/* MDX body */}
               <div className="prose-bygglov">
-                <MDXRemote source={content} components={mdxComponents} options={{ blockJS: false, mdxOptions: { remarkPlugins: [remarkGfm] } }} />
+                <MDXRemote source={saneraKonsultCta(content)} components={mdxComponents} options={{ blockJS: false, mdxOptions: { remarkPlugins: [remarkGfm] } }} />
               </div>
 
               {/* FAQ */}
@@ -222,7 +224,7 @@ export default async function KommunPage({ params }: Props) {
 
             {/* Sidebar */}
             <aside className="lg:sticky lg:top-24 space-y-5">
-              <LeadForm source={`kommun-${slug}`} kommun={fm.kommunNamn} compact />
+              <LeadForm source={`kommun-${slug}`} kommun={fm.kommunNamn} compact bygglovskoll={bygglovskollAktiv()} />
 
               {/*
                 Åtgärdslistan drivs av getAtgarderGrid() i stället för en handplockad

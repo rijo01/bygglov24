@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 import LeadForm from "@/components/LeadForm";
+import { bygglovskollAktiv } from "@/lib/bygglovskoll/flag";
 import { Icon, type IconName } from "@/lib/icons";
 
 export const metadata: Metadata = {
@@ -27,6 +29,12 @@ const serviceSchema = {
 };
 
 export default function KonsultPage() {
+  // Sidan beskriver en kostnadsfri konsultmatchning där konsulten betalar en
+  // matchningsavgift. Det nätverket finns inte. Med Bygglovskoll påslagen
+  // skickas trafiken i stället till de tjänster vi faktiskt levererar.
+  // 307 (temporär) — sidan kan komma tillbaka om matchningen byggs på riktigt.
+  if (bygglovskollAktiv()) redirect("/hjalp-med-bygglov");
+
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceSchema) }} />

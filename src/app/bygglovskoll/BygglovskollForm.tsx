@@ -7,7 +7,19 @@ import * as copy from "@/lib/bygglovskoll/copy";
 import { GRANS, STRANDSKYDD } from "@/lib/bygglovskoll/rules";
 import type { Intake, JaNejVetEj, TriageResultat } from "@/lib/bygglovskoll/types";
 
-const TOM: Intake = {
+/**
+ * Formulärets utkast. Vatten, kulturmiljö och installationer saknar förvalt
+ * värde — de måste besvaras aktivt. Ett förvalt "vet ej" hade sett ut som ett
+ * svar användaren gett, och de tre frågorna avgör om ärendet över huvud taget
+ * kan säljas som Bygglovskoll.
+ */
+type Utkast = Omit<Intake, "naraVatten" | "kulturSamfallighet" | "installation"> & {
+  naraVatten: JaNejVetEj | null;
+  kulturSamfallighet: JaNejVetEj | null;
+  installation: JaNejVetEj | null;
+};
+
+const TOM: Utkast = {
   atgard: "tillbyggnad",
   placering: null,
   yta: null,
@@ -18,11 +30,11 @@ const TOM: Intake = {
   kommun: "",
   fastighetsbeteckning: "",
   detaljplan: "vetej",
-  naraVatten: "vetej",
-  kulturSamfallighet: "vetej",
+  naraVatten: null,
+  kulturSamfallighet: null,
   befintligaKomplement: "vetej",
   befintligKomplementYta: null,
-  installation: "vetej",
+  installation: null,
   fritext: "",
   epost: "",
 };
@@ -97,7 +109,7 @@ const inputKlass =
 
 export default function BygglovskollForm({ kommuner }: { kommuner: string[] }) {
   const [steg, setSteg] = useState(1);
-  const [i, setI] = useState<Intake>(TOM);
+  const [i, setI] = useState<Utkast>(TOM);
   const [resultat, setResultat] = useState<TriageResultat | null>(null);
   const [kryssVagledning, setKryssVagledning] = useState(false);
   const [kryssAngerratt, setKryssAngerratt] = useState(false);
@@ -105,7 +117,7 @@ export default function BygglovskollForm({ kommuner }: { kommuner: string[] }) {
   const [fel, setFel] = useState<string | null>(null);
   const [visaGratischunk, setVisaGratischunk] = useState(false);
 
-  const uppd = (delta: Partial<Intake>) => setI((prev) => ({ ...prev, ...delta }));
+  const uppd = (delta: Partial<Utkast>) => setI((prev) => ({ ...prev, ...delta }));
 
   const behoverMatt = i.atgard !== "fasadandring";
   const idag = new Date().toISOString().slice(0, 10);
@@ -113,13 +125,24 @@ export default function BygglovskollForm({ kommuner }: { kommuner: string[] }) {
   const kanGaVidare = useMemo(() => {
     if (steg === 1) return i.atgard !== "tillbyggnad" || i.placering !== null;
     if (steg === 2) return !behoverMatt || (i.yta !== null || i.hojd !== null);
-    if (steg === 3) return i.kommun.trim().length > 0;
-    if (steg === 4) return /.+@.+\..+/.test(i.epost) && i.fritext.length <= 500;
+    if (steg === 3) return i.kommun.trim().length > 0 && i.naraVatten !== null && i.kulturSamfallighet !== null;
+    if (steg === 4)
+      return (
+        i.installation !== null && /.+@.+\..+/.test(i.epost) && i.fritext.length <= 500
+      );
     return false;
   }, [steg, i, behoverMatt]);
 
+  /** Utkastet är komplett först när de tre tvingande frågorna är besvarade. */
+  const somIntake = (u: Utkast): Intake | null =>
+    u.naraVatten === null || u.kulturSamfallighet === null || u.installation === null
+      ? null
+      : { ...u, naraVatten: u.naraVatten, kulturSamfallighet: u.kulturSamfallighet, installation: u.installation };
+
   const kor = () => {
-    setResultat(triage(i));
+    const komplett = somIntake(i);
+    if (!komplett) return;
+    setResultat(triage(komplett));
     setSteg(5);
   };
 
@@ -130,7 +153,7 @@ export default function BygglovskollForm({ kommuner }: { kommuner: string[] }) {
       const res = await fetch("/api/bygglovskoll/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ intake: i, samtycken: { vagledning: kryssVagledning, angerratt: kryssAngerratt } }),
+        body: JSON.stringify({ intake: somIntake(i), samtycken: { vagledning: kryssVagledning, angerratt: kryssAngerratt } }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Kunde inte starta betalningen.");
@@ -189,6 +212,7 @@ export default function BygglovskollForm({ kommuner }: { kommuner: string[] }) {
         </div>
         <LeadForm
           source="bygglovskoll-B"
+          bygglovskoll
           kommun={i.kommun}
           freeOffer={false}
           heading="Vill du att vi hör av oss om utredningen?"

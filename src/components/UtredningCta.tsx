@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Icon } from "@/lib/icons";
+import { bygglovskollAktiv } from "@/lib/bygglovskoll/flag";
 
 /**
  * Diskret CTA som placeras efter huvudinnehållet på guide- och kommunsidor.
@@ -7,6 +8,34 @@ import { Icon } from "@/lib/icons";
  * den ska läsas som nästa steg, inte som en annons.
  */
 export default function UtredningCta() {
+  const bygglovskoll = bygglovskollAktiv();
+
+  if (bygglovskoll) {
+    return (
+      <aside className="mt-12 card p-6 bg-brand-50 border-brand-100">
+        <div className="flex items-start gap-4">
+          <Icon name="file-text" className="w-6 h-6 text-brand-600 shrink-0 mt-0.5" />
+          <div>
+            <h2 className="font-display text-lg font-semibold text-slate-900 mb-1.5">
+              Osäker på om ditt projekt kräver lov?
+            </h2>
+            <p className="text-slate-700 text-sm leading-relaxed mb-3">
+              Gör en Bygglovskoll för 99 kr — en skriftlig orientering utifrån dina uppgifter. Det
+              bindande beskedet ges av byggnadsnämnden.
+            </p>
+            <Link
+              href="/bygglovskoll"
+              className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand-700 hover:text-brand-900"
+            >
+              Starta Bygglovskoll
+              <span aria-hidden="true">→</span>
+            </Link>
+          </div>
+        </div>
+      </aside>
+    );
+  }
+
   return (
     <aside className="mt-12 card p-6 bg-brand-50 border-brand-100">
       <div className="flex items-start gap-4">

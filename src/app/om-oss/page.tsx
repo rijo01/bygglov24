@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { bygglovskollAktiv } from "@/lib/bygglovskoll/flag";
 import Link from "next/link";
 import { getAllKommuner, getAllGuider } from "@/lib/content";
 
@@ -8,8 +9,9 @@ const PUBLICERADE_GUIDER = getAllGuider().length;
 
 export const metadata: Metadata = {
   title: "Om Bygglov24 – Sveriges kompletta guide till bygglov",
-  description:
-    `Bygglov24 är Sveriges mest kompletta guide till bygglov med information för ${PUBLICERADE_KOMMUNER} av ${TOTALA_KOMMUNER} kommuner. Kostnadsfri matchning med lokala bygglovskonsulter.`,
+  description: bygglovskollAktiv()
+    ? `Bygglov24 är Sveriges mest kompletta guide till bygglov med information för ${PUBLICERADE_KOMMUNER} av ${TOTALA_KOMMUNER} kommuner. Vi levererar Bygglovskoll och Bygglovsutredning.`
+    : `Bygglov24 är Sveriges mest kompletta guide till bygglov med information för ${PUBLICERADE_KOMMUNER} av ${TOTALA_KOMMUNER} kommuner. Kostnadsfri matchning med lokala bygglovskonsulter.`,
   alternates: { canonical: "https://bygglov24.se/om-oss" },
 };
 
@@ -20,6 +22,8 @@ const stats = [
 ];
 
 export default function OmOssPage() {
+  const bygglovskoll = bygglovskollAktiv();
+
   return (
     <div className="bg-gradient-to-b from-brand-50 to-white py-16">
       <div className="container-content">
@@ -65,13 +69,47 @@ export default function OmOssPage() {
             <li><strong>Kommunspecifika sidor</strong> – avgifter, handläggningstider och kontaktuppgifter för byggnadsnämnden i varje kommun</li>
             <li><strong>Åtgärdstyper</strong> – allt om Attefall, friggebod, tillbyggnad, carport, plank, pool och mer</li>
             <li><strong>Guider</strong> – från ansökan och kontrollansvarig till strandskydd och nya regler för 2026</li>
-            <li><strong>Kostnadsfri matchning</strong> – vi kopplar dig till en lokal bygglovskonsult som känner reglerna i just din kommun</li>
+            {!bygglovskoll && (
+              <li><strong>Kostnadsfri matchning</strong> – vi kopplar dig till en lokal bygglovskonsult som känner reglerna i just din kommun</li>
+            )}
           </ul>
 
-          <h2>Tjänsten är kostnadsfri</h2>
-          <p>
-            All information på sajten är gratis att läsa. Även vår matchning med bygglovskonsulter är kostnadsfri – konsulten betalar oss en mindre matchningsavgift om ni inleder samarbete, vilket innebär att du som besökare aldrig behöver lägga ut något.
-          </p>
+          {bygglovskoll ? (
+            <>
+              <h2>Våra tjänster</h2>
+              <p>
+                All information på sajten är fri att läsa. Utöver den levererar vi tre saker själva:
+              </p>
+              <ul>
+                <li>
+                  <strong>Bygglovskoll, 99 kr</strong> – ett personligt skriftligt underlag utifrån de
+                  uppgifter du lämnar: sannolik klassning, de regler som gäller för den, hur dina mått
+                  ligger mot de nationella trösklarna och en checklista mot din kommun. Det är
+                  vägledning och underlag, inte ett besked.
+                </li>
+                <li>
+                  <strong>Bygglovsutredning, 2 950 kr</strong> – en fastighetsspecifik genomgång av
+                  detaljplan, byggrätt och strandskydd med en skriftlig rekommendation. Också
+                  vägledning, inte kommunens beslut.
+                </li>
+                <li>
+                  <strong>Handlingar, ritningar och ansökan</strong> – mot offert. Vi återkommer med
+                  omfattning och pris innan något arbete påbörjas.
+                </li>
+              </ul>
+              <p>
+                Det bindande beskedet ges alltid av byggnadsnämnden i din kommun. Vi fattar inga
+                beslut och företräder inte kommunen.
+              </p>
+            </>
+          ) : (
+            <>
+              <h2>Tjänsten är kostnadsfri</h2>
+              <p>
+                All information på sajten är gratis att läsa. Även vår matchning med bygglovskonsulter är kostnadsfri – konsulten betalar oss en mindre matchningsavgift om ni inleder samarbete, vilket innebär att du som besökare aldrig behöver lägga ut något.
+              </p>
+            </>
+          )}
 
           <h2>Innehållet</h2>
           <p>
@@ -83,7 +121,7 @@ export default function OmOssPage() {
 
           <h2>Kontakt</h2>
           <p>
-            Har du frågor, synpunkter eller vill samarbeta? Mejla oss på <a href="mailto:info@bygglov24.se">info@bygglov24.se</a> – vi svarar normalt inom en arbetsdag.
+            Har du frågor, synpunkter eller vill samarbeta? Mejla oss på <a href="mailto:info@bygglov24.se">info@bygglov24.se</a>.
           </p>
         </article>
 
@@ -92,10 +130,12 @@ export default function OmOssPage() {
             Redo att komma igång?
           </h2>
           <p className="text-slate-600 mb-6 max-w-lg mx-auto">
-            Matchas med en lokal bygglovskonsult – kostnadsfritt och utan förpliktelser.
+            {bygglovskoll
+              ? "Börja med en Bygglovskoll för 99 kr — skriftlig orientering utifrån dina uppgifter."
+              : "Matchas med en lokal bygglovskonsult – kostnadsfritt och utan förpliktelser."}
           </p>
-          <Link href="/konsult" className="btn-primary">
-            Få kostnadsfri konsultation →
+          <Link href={bygglovskoll ? "/bygglovskoll" : "/konsult"} className="btn-primary">
+            {bygglovskoll ? "Starta Bygglovskoll" : "Få kostnadsfri konsultation"} →
           </Link>
         </div>
       </div>
