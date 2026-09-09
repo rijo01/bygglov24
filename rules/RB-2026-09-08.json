@@ -1,0 +1,172 @@
+{
+  "version": "RB-2026-09-08",
+  "copyVersion": "COPY-2026-09-08",
+  "pdfTemplateVersion": "PDF-1.0",
+  "metadata": {
+    "verifieradTom": "SFS 2026:1722",
+    "kontrolleradDatum": "2026-09-08",
+    "nastaKontroll": "2026-12-08",
+    "stampel": "Verifierad t.o.m. SFS 2026:1722, kontrollerad 2026-09-08. Nästa kontroll: 2026-12-08 eller vid ny SFS som berör PBL 9, 10 eller 12 kap. eller PBF 6 eller 9 kap.",
+    "kalla": "docs/regelbank/RB-2026-09-08.md",
+    "not": "Enda tillåtna källan för trösklar, areatyper och lagrum i Bygglovskoll. Ändra aldrig ett värde här utan att regelbanken ändras först."
+  },
+  "regler": {
+    "komplementbyggnad": {
+      "radnummer": 2,
+      "status": "V",
+      "namn": "Komplementbyggnad (fristående) till en-/tvåbostadshus",
+      "lagrum": "PBL 9 kap. 4–5 §§",
+      "areatyp": "BYA",
+      "inomDetaljplan": {
+        "maxAreaPerByggnad": 30.0,
+        "maxTaknockshojd": 4.0,
+        "pottPerTomt": 45.0
+      },
+      "utanforDetaljplan": {
+        "maxAreaPerByggnad": 50.0,
+        "maxTaknockshojd": 4.5,
+        "pottPerTomt": 65.0
+      },
+      "villkor": [
+        "Mindre än huvudbyggnaden och placerad inom tomten.",
+        "Befintliga komplementbyggnader – inklusive äldre friggebodar och attefallshus – räknas in i potten.",
+        "Ingen anmälan krävs för själva byggnaden."
+      ]
+    },
+    "tillbyggnad": {
+      "radnummer": 3,
+      "status": "V",
+      "namn": "Tillbyggnad till en-/tvåbostadshus",
+      "lagrum": "PBL 9 kap. 10 §",
+      "areatyp": "BTA eller OPA (eller kombination)",
+      "maxArea": 30.0,
+      "sammaInomOchUtanforDetaljplan": true,
+      "villkor": [
+        "Får inte överstiga byggnadens taknock.",
+        "Kumulativt med tidigare lovfria tillbyggnader (äldre attefallstillbyggnad, takkupor, skärmtak).",
+        "Ingen anmälan krävs."
+      ]
+    },
+    "skarmtak": {
+      "radnummer": 4,
+      "status": "V",
+      "namn": "Skärmtak",
+      "lagrum": "PBL 9 kap. 10 § (SFS 2025:974 upphävde särregeln)",
+      "areatyp": "OPA",
+      "egenRegel": false,
+      "villkor": [
+        "Ingen egen regel sedan 1 december 2025.",
+        "Tak sammanbyggt med huset som ökar volymen prövas som tillbyggnad mot 30 m²-potten.",
+        "Äldre 15 m²-skärmtak räknas in i potten."
+      ]
+    },
+    "fristaendeTakPaStolpar": {
+      "radnummer": 5,
+      "status": "V",
+      "namn": "Fristående tak på stolpar (pergola, carport, lamelltak)",
+      "lagrum": "Boverket, rättspraxis",
+      "egenKategori": false,
+      "villkor": [
+        "Ingen egen kategori. Bedöms efter faktisk konstruktion: är det en byggnad blir det en komplementbyggnad.",
+        "Att kalla konstruktionen skärmtak ändrar inte klassificeringen.",
+        "Väggar, delvis inglasning eller skjutbart tak ger tvetydig klassning och kräver utredning."
+      ]
+    },
+    "murPlankAltan": {
+      "radnummer": 8,
+      "status": "V",
+      "namn": "Mur, plank, altan inom detaljplan",
+      "lagrum": "PBL 9 kap. 19 §",
+      "areatyp": null,
+      "hojdInomNaraByggnad": 1.8,
+      "avstandNaraByggnad": 3.6,
+      "hojdLangreBort": 1.2,
+      "villkor": [
+        "Lov krävs om höjden överstiger 1,8 m inom 3,6 m från en byggnad, eller överstiger 1,2 m längre bort.",
+        "Plank på mur och altan på mur räknas med sammanlagd höjd.",
+        "Staket med genomsiktlighet omfattas inte; gränsen staket/plank avgörs av rättspraxis och kommunal policy är inte bindande."
+      ]
+    },
+    "utokadLovpliktGransJarnvag": {
+      "radnummer": 9,
+      "status": "V",
+      "namn": "Utökad lovplikt nära gräns och järnväg",
+      "lagrum": "PBL 9 kap. 34–35 §§",
+      "avstandTomtgrans": 4.5,
+      "avstandJarnvagsspårsMitt": 30.0,
+      "hojdMurPlank": 1.2,
+      "villkor": [
+        "Närmare gräns än 4,5 m eller inom 30,0 m från järnvägsspårs mitt krävs lov för nybyggnad och tillbyggnad, ändring enligt 16 §, samt mur eller plank högre än 1,2 m.",
+        "Samma tröskel gäller för gräns och järnväg.",
+        "Medgivande enligt 35 §: granne, vid allmän plats huvudmannen, vid järnväg infrastrukturförvaltaren.",
+        "Altan omfattas inte av 34 § p. 3."
+      ]
+    },
+    "utokadLovpliktKulturmiljo": {
+      "radnummer": 10,
+      "status": "V",
+      "namn": "Utökad lovplikt kulturvärde / riksintresse",
+      "lagrum": "PBL 9 kap. 36–38 §§",
+      "villkor": [
+        "Följer direkt av lagen vid särskilt värdefull byggnad (37 §) eller anläggning/område (38 §) samt totalförsvarets riksintressen (36 §).",
+        "Kommunen pekar ut vad som är värdefullt men sätter ingen egen tröskel."
+      ]
+    },
+    "marklov": {
+      "radnummer": 14,
+      "status": "V",
+      "namn": "Marklov inom detaljplan",
+      "lagrum": "PBL 9 kap. 47, 50 §§",
+      "hojdandringTroskel": 0.5,
+      "villkor": [
+        "Schaktning eller fyllning som ändrar höjdläget mer än 0,5 m, om inte till planens bestämda nivå (47 §).",
+        "Inget separat marklov om markåtgärden omfattas av bygglov (50 §)."
+      ]
+    },
+    "anmalanPBF": {
+      "radnummer": 18,
+      "status": "V",
+      "namn": "Anmälan enligt PBF",
+      "lagrum": "PBF 6 kap. 1, 2 och 5 §§ (lydelse enl. förordning 2025:979)",
+      "handlaggningstidVeckor": 4,
+      "forlangningVeckor": 4,
+      "villkor": [
+        "Anmälan krävs för åtgärd som inte omfattas av krav på bygglov, rivningslov eller marklov vid: rivning av byggnad eller del av byggnad med byggnadsarea över 50,0 m²; ändring som innebär att konstruktionen av byggnadens bärande delar påverkas väsentligt; ändring som innebär att brandskyddet påverkas väsentligt; installation eller väsentlig ändring av hiss, eldstad, rökkanal eller anordning för ventilation; installation eller väsentlig ändring av anläggning för vattenförsörjning eller avlopp; nybyggnad eller väsentlig ändring av vindkraftverk.",
+        "Handläggningstid för anmälan är 4 veckor och får förlängas en gång med högst 4 veckor.",
+        "Tröskeln är att något påverkas väsentligt."
+      ]
+    },
+    "strandskydd": {
+      "radnummer": 22,
+      "status": "V",
+      "namn": "Strandskydd",
+      "lagrum": "MB 7 kap. 13–18 §§",
+      "normaltMeter": 100,
+      "utokatMeter": 300,
+      "villkor": [
+        "Strandskydd gäller normalt 100 m från strandlinjen och kan vara utökat till 300 m.",
+        "Dispens kan krävas oavsett bygglovsfrågan.",
+        "Kontrolleras mot länsstyrelsens karta för fastigheten."
+      ]
+    },
+    "anmalanVidPlanundantag": {
+      "radnummer": 26,
+      "status": "V",
+      "namn": "Anmälan vid lovbefrielse genom plan",
+      "lagrum": "PBF 6 kap. 3 § (lydelse enl. förordning 2025:979); upphävs 2027-12-01 genom förordning 2025:980",
+      "gallerTom": "2027-11-30",
+      "villkor": [
+        "Anmälan krävs för nybyggnad eller tillbyggnad som omfattas av krav på bygglov enligt PBL men har undantagits från krav på bygglov enligt bestämmelser i en detaljplan eller i områdesbestämmelser.",
+        "Nationellt lovfria åtgärder enligt PBL 9 kap. 4–5 §§ och 10 § omfattas inte.",
+        "Startbesked krävs innan åtgärden påbörjas."
+      ]
+    }
+  },
+  "handlaggningstidLov": {
+    "radnummer": 12,
+    "status": "V",
+    "lagrum": "PBL 9 kap. 99, 99 a §§ (lydelse Lag 2026:406; 99 § även Lag 2025:1079)",
+    "veckor": 10,
+    "formulering": "Kommunen ska normalt besluta inom 10 veckor från komplett ansökan. Den faktiska tiden varierar."
+  }
+}
