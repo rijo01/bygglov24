@@ -150,6 +150,27 @@ describe("förbjudna fraser", () => {
     }
   });
 
+  it("produktsidornas egna strängar är rena", () => {
+    // Spec avsnitt 3 kräver lint mot copy OCH renderer. copy.ts och mallarna
+    // täcks ovan; här skannas sidornas och komponenternas literaler.
+    const filer = [
+      "src/app/bygglovskoll/page.tsx",
+      "src/app/bygglovskoll/BygglovskollForm.tsx",
+      "src/app/bygglovskoll/klar/page.tsx",
+      "src/app/bygglovskoll/klar/KlarKlient.tsx",
+      "src/lib/bygglovskoll/templates.ts",
+      "src/lib/bygglovskoll/triage.ts",
+    ];
+    for (const rel of filer) {
+      const kalla = fs.readFileSync(path.resolve(__dirname, "..", rel), "utf8");
+      // Kommentarer bort — lintet gäller det som når användaren.
+      const utanKommentarer = kalla
+        .replace(/\/\*[\s\S]*?\*\//g, " ")
+        .replace(/^\s*\/\/.*$/gm, " ");
+      granska(rel, utanKommentarer);
+    }
+  });
+
   it("sidfoten bär verifieringsstämpeln", () => {
     const o = byggOrientering(bas(), triage(bas()), new Date("2026-09-09T10:00:00Z"));
     const rules = JSON.parse(fs.readFileSync(path.resolve(__dirname, "../rules/RB-2026-09-08.json"), "utf8"));
