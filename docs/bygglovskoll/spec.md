@@ -243,7 +243,20 @@ Bygglovskoll är avsedd för avgränsade projekt där de nationella trösklarna 
 - \[flagga 1, klartext\]
 - \[flagga 2, klartext\]
 
-Exempel på klartext: - «Du har angett att tomten ligger nära vatten, eller att du inte vet. Strandskydd prövas separat och kan kräva dispens oavsett bygglovsfrågan.» - «Avståndet till tomtgräns är under 4,5 m eller okänt. Det påverkar lovplikten.» - «Måtten ligger nära eller över en relevant tröskel.» - «Du har angett installation av vatten, avlopp, ventilation eller eldstad.» - «Fastigheten är flerbostadshus/BRF eller kulturmiljö/samfällighet är ja eller oklart.»
+Exempel på klartext: - «Avståndet till tomtgräns är under 4,5 m eller okänt. Det påverkar lovplikten.» - «Måtten ligger nära eller över en relevant tröskel.»
+
+**B2, B3 och B5 har två varianter var.** Flaggan utlöses av två skilda svar — ja och vet ej — och en gemensam text («… eller så är det oklart») döljer vilket av dem som låg bakom. Kunden ska kunna läsa sitt eget svar i orsaken, och vi ska kunna se det i supporten. Orsakskoden är densamma i båda fallen; bara texten skiljer.
+
+| Flagga | Svar | Text |
+|:---|:---|----|
+| B2 | ja | «Du angav att tomten ligger nära hav, sjö eller vattendrag. Strandskydd prövas separat och kan kräva dispens oavsett bygglovsfrågan.» |
+| B2 | vet ej | «Du angav att du inte vet om tomten ligger nära hav, sjö eller vattendrag. Strandskydd prövas separat och kan kräva dispens oavsett bygglovsfrågan.» |
+| B3 | ja | «Du angav att byggnaden eller området är kulturhistoriskt utpekat, eller att fastigheten ligger inom samfällighet eller BRF. Det kan utlösa utökad lovplikt för åtgärder som annars inte kräver lov.» |
+| B3 | vet ej | «Du angav att du inte vet om byggnaden eller området är kulturhistoriskt utpekat, eller om fastigheten ligger inom samfällighet eller BRF. Det kan utlösa utökad lovplikt för åtgärder som annars inte kräver lov.» |
+| B5 | ja | «Du angav att vatten, avlopp, ventilation eller eldstad installeras. Teknisk anmälan kan krävas även när byggnaden i sig är lovfri.» |
+| B5 | vet ej | «Du angav att du inte vet om vatten, avlopp, ventilation eller eldstad installeras. Teknisk anmälan kan krävas även när byggnaden i sig är lovfri.» |
+
+**Obesvarat är inte vet ej.** De tre frågorna bakom B2, B3 och B5 har inget förval. Ett tomt svar är ett valideringsfel — i formuläret som en text som säger vilken fråga som saknas, i API:t som 400 med samma text. Det får aldrig tolkas som «vet ej» och tyst bli B, eftersom kunden då hänvisas till utredning utifrån ett svar hen inte har lämnat.
 
 ### Vad utredningen är
 

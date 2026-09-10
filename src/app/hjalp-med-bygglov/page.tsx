@@ -113,10 +113,11 @@ export default function HjalpMedBygglovPage() {
             </div>
           </article>
 
-          <aside className="lg:sticky lg:top-24">
+          <aside id="offert" className="lg:sticky lg:top-24 scroll-mt-24">
             <LeadForm
-              source="tjanstesida"
+              source="offert"
               freeOffer={false}
+              bygglovskoll={bygglovskollAktiv()}
               heading="Beskriv ditt projekt"
               intro="Berätta vad du planerar och var fastigheten ligger, så återkommer vi med vad som behövs och vad det kostar."
             />

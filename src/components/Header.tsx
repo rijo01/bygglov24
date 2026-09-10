@@ -16,8 +16,10 @@ export default function Header({ visaBygglovskoll = false }: { visaBygglovskoll?
 
   // Bygglovskoll ligger bakom en feature-flagga som bara servern kan läsa,
   // så värdet kommer in som prop från layouten.
+  // Med flaggan på: Bygglovskoll först, och "Hitta konsult" bort — /konsult
+  // redirectar då och tjänsten finns inte.
   const navItems = visaBygglovskoll
-    ? [{ href: "/bygglovskoll", label: "Bygglovskoll" }, ...nav]
+    ? [{ href: "/bygglovskoll", label: "Bygglovskoll" }, ...nav.filter((n) => n.href !== "/konsult")]
     : nav;
 
   return (
@@ -51,8 +53,11 @@ export default function Header({ visaBygglovskoll = false }: { visaBygglovskoll?
 
           {/* CTA */}
           <div className="hidden md:flex items-center gap-3">
-            <Link href="/konsult" className="btn-primary text-sm py-2 px-4">
-              Få offert gratis
+            <Link
+              href={visaBygglovskoll ? "/bygglovskoll" : "/konsult"}
+              className="btn-primary text-sm py-2 px-4"
+            >
+              {visaBygglovskoll ? "Bygglovskoll 99 kr" : "Få offert gratis"}
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 7H13M8 2L13 7L8 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
             </Link>
           </div>
@@ -85,8 +90,11 @@ export default function Header({ visaBygglovskoll = false }: { visaBygglovskoll?
               </Link>
             ))}
             <div className="pt-2 pb-1">
-              <Link href="/konsult" className="btn-primary text-sm w-full justify-center">
-                Få offert gratis →
+              <Link
+                href={visaBygglovskoll ? "/bygglovskoll" : "/konsult"}
+                className="btn-primary text-sm w-full justify-center"
+              >
+                {visaBygglovskoll ? "Bygglovskoll 99 kr" : "Få offert gratis"} →
               </Link>
             </div>
           </div>

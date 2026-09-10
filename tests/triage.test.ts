@@ -21,6 +21,7 @@ function bas(over: Partial<Intake> = {}): Intake {
     befintligKomplementYta: null,
     installation: "nej",
     fritext: "",
+    fraga: "",
     epost: "test@exempel.se",
     ...over,
   };

@@ -25,11 +25,17 @@ const FORBJUDNA = [
   "nöjda kunder",
 ];
 
-/** Undantagna blocken: negationer där frasen är avsedd. */
-const UNDANTAG: string[] = [
-  ...copy.VAD_DET_INTE_AR,
-  copy.C_BROD,
-];
+/**
+ * Undantagna blocken: negationer där frasen är avsedd, plus förbehållet för
+ * tillägget «Fråga oss». Det sista innehåller ordet «svaret» i betydelsen «det
+ * skriftliga svar vi skickar» — inte «rätt svar på lovfrågan», som är den
+ * betydelse listan är skriven mot. Listan FORBJUDNA är oförändrad.
+ */
+// Längsta först: ett kortare undantag ("juridisk rådgivning") är en del av ett
+// längre, och stryks det först matchar det längre aldrig.
+const UNDANTAG: string[] = [...copy.VAD_DET_INTE_AR, copy.C_BROD, copy.FRAGA_FORBEHALL].sort(
+  (a, b) => b.length - a.length,
+);
 
 function stryckUndantag(text: string): string {
   let ut = text;
@@ -49,7 +55,7 @@ function bas(over: Partial<Intake> = {}): Intake {
     atgard: "fristaende", placering: "fristaende", yta: 12, hojd: 2.5, langd: null,
     avstandTomtgrans: 6, fastighetstyp: "villa", kommun: "Uppsala", fastighetsbeteckning: "",
     detaljplan: "ja", naraVatten: "nej", kulturSamfallighet: "nej", befintligaKomplement: "nej",
-    befintligKomplementYta: null, installation: "nej", fritext: "", epost: "a@b.se", ...over,
+    befintligKomplementYta: null, installation: "nej", fritext: "", fraga: "", epost: "a@b.se", ...over,
   };
 }
 
@@ -171,6 +177,57 @@ describe("förbjudna fraser", () => {
         .replace(/^\s*\/\/.*$/gm, " ");
       granska(rel, utanKommentarer);
     }
+  });
+
+  it("säljytorna lovar inget kostnadsfritt när flaggan är på", () => {
+    // Punkt 7: dessa fyra är tillåtna bara i flagg-av-läget. Filerna nedan
+    // renderas bara när Bygglovskoll är påslagen, eller innehåller enbart
+    // flagg-på-grenen, så de får aldrig bära löftena.
+    const SALJFRASER = ["kostnadsfri", "gratis bedömning", "svar inom 24h", "svar inom 24 timmar", "konsultmatchning"];
+    // Endast filer utan flagg-av-gren. Komponenter med båda grenarna (LeadForm,
+    // UtredningCta, startsidan, om-oss, Header) måste tvärtom behålla den gamla
+    // copyn — det kontrolleras i nästa test.
+    const filer = [
+      "src/components/HeroVal.tsx",
+      "src/lib/cta.ts",
+      "src/app/bygglovskoll/page.tsx",
+      "src/app/bygglovskoll/BygglovskollForm.tsx",
+    ];
+    for (const rel of filer) {
+      const kalla = fs
+        .readFileSync(path.resolve(__dirname, "..", rel), "utf8")
+        .replace(/\/\*[\s\S]*?\*\//g, " ")
+        .replace(/^\s*\/\/.*$/gm, " ")
+        .toLowerCase();
+      for (const fras of SALJFRASER) {
+        expect(kalla.includes(fras), `"${fras}" förekommer i ${rel}`).toBe(false);
+      }
+    }
+  });
+
+  it("flagg-av-grenen får behålla den gamla copyn", () => {
+    // Sidor med båda grenarna: den gamla texten ska finnas kvar, annars har
+    // flagg-av-läget ändrats — och då ser sajten inte längre ut som idag.
+    // Varje fil med två grenar: det som måste finnas kvar i flagg-av-läget.
+    const MARKOR: Array<[string, string]> = [
+      ["src/app/page.tsx", "Konsultmatchning"],
+      ["src/app/om-oss/page.tsx", "Tjänsten är kostnadsfri"],
+      ["src/components/Header.tsx", "Få offert gratis"],
+      ["src/components/LeadForm.tsx", "Helt kostnadsfritt"],
+      ["src/components/UtredningCta.tsx", "Osäker på om ditt projekt kräver bygglov?"],
+    ];
+    for (const [rel, markor] of MARKOR) {
+      const kalla = fs.readFileSync(path.resolve(__dirname, "..", rel), "utf8");
+      expect(kalla, `${rel} saknar flagg-av-grenen: "${markor}"`).toContain(markor);
+    }
+  });
+
+  it("LeadForm bär båda grenarna", () => {
+    const kalla = fs.readFileSync(path.resolve(__dirname, "../src/components/LeadForm.tsx"), "utf8");
+    // Flagg av: ursprunglig konsultcopy. Flagg på: offertcopy utan löften.
+    expect(kalla).toContain("Få hjälp av en bygglovskonsult");
+    expect(kalla).toContain("Begär offert på handlingar, ritningar eller ansökan");
+    expect(kalla).toContain("bygglovskoll");
   });
 
   it("sidfoten bär verifieringsstämpeln", () => {

@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { MDXRemote } from "next-mdx-remote/rsc";
 import remarkGfm from "remark-gfm";
+import { saneraKonsultCta } from "@/lib/cta";
+import { bygglovskollAktiv } from "@/lib/bygglovskoll/flag";
 import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
@@ -161,7 +163,7 @@ export default async function GuidePage({ params }: Props) {
               </div>
 
               <div className="prose-bygglov">
-                <MDXRemote source={content} components={mdxComponents} options={{ blockJS: false, mdxOptions: { remarkPlugins: [remarkGfm] } }} />
+                <MDXRemote source={saneraKonsultCta(content)} components={mdxComponents} options={{ blockJS: false, mdxOptions: { remarkPlugins: [remarkGfm] } }} />
               </div>
 
               {fm.faq && fm.faq.length > 0 && (
@@ -209,7 +211,7 @@ export default async function GuidePage({ params }: Props) {
             </article>
 
             <aside className="lg:sticky lg:top-24 space-y-5">
-              <LeadForm source={`guide-${slug}`} compact />
+              <LeadForm source={`guide-${slug}`} compact bygglovskoll={bygglovskollAktiv()} />
               {/* Drivs av getAtgarderGrid() så att alla åtgärdssidor länkas in, inte bara fyra. */}
               <div className="card p-5">
                 <h3 className="font-display font-semibold text-slate-900 mb-3">Populära guider</h3>

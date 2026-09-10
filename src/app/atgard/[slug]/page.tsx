@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { MDXRemote } from "next-mdx-remote/rsc";
 import remarkGfm from "remark-gfm";
+import { saneraKonsultCta } from "@/lib/cta";
+import { bygglovskollAktiv } from "@/lib/bygglovskoll/flag";
 import { getAtgard, getAllAtgarder, robotsFor } from "@/lib/content";
 import LeadForm from "@/components/LeadForm";
 import { mdxComponents } from "@/components/mdx-components";
@@ -154,7 +156,7 @@ export default async function AtgardPage({ params }: Props) {
 
               {/* MDX body */}
               <div className="prose-bygglov">
-                <MDXRemote source={content} components={mdxComponents} options={{ blockJS: false, mdxOptions: { remarkPlugins: [remarkGfm] } }} />
+                <MDXRemote source={saneraKonsultCta(content)} components={mdxComponents} options={{ blockJS: false, mdxOptions: { remarkPlugins: [remarkGfm] } }} />
               </div>
 
               {/* FAQ */}
@@ -180,7 +182,7 @@ export default async function AtgardPage({ params }: Props) {
 
             {/* Sidebar */}
             <aside className="lg:sticky lg:top-24 space-y-5">
-              <LeadForm source={`atgard-${slug}`} atgard={fm.title} compact />
+              <LeadForm source={`atgard-${slug}`} atgard={fm.title} compact bygglovskoll={bygglovskollAktiv()} />
 
               <div className="card p-5">
                 <h3 className="font-display font-semibold text-slate-900 mb-3">Hitta din kommuns regler</h3>

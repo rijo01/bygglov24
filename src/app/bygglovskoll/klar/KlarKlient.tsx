@@ -3,12 +3,15 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { laddaNerPdf } from "@/lib/bygglovskoll/pdf";
+import { fragaLeverans } from "@/lib/bygglovskoll/copy";
 import type { Orientering } from "@/lib/bygglovskoll/templates";
 
 export default function KlarKlient() {
   const params = useSearchParams();
   const sessionId = params.get("session_id");
   const [orientering, setOrientering] = useState<Orientering | null>(null);
+  /** Sätts bara när tillägget «Fråga oss» faktiskt är betalt på sessionen. */
+  const [svarTill, setSvarTill] = useState<string | null>(null);
   const [fel, setFel] = useState<string | null>(null);
 
   useEffect(() => {
@@ -21,6 +24,7 @@ export default function KlarKlient() {
         const data = await r.json();
         if (!r.ok) throw new Error(data.error || "Kunde inte verifiera betalningen.");
         setOrientering(data.orientering as Orientering);
+        setSvarTill((data.personligtSvar?.epost as string | undefined) ?? null);
       })
       .catch((e) => setFel(e instanceof Error ? e.message : "Kunde inte verifiera betalningen."));
   }, [sessionId]);
@@ -41,6 +45,12 @@ export default function KlarKlient() {
     <div className="max-w-3xl">
       <p className="text-xs uppercase tracking-wide text-slate-500 mb-2">{orientering.sidhuvud}</p>
       <h1 className="font-display text-3xl font-semibold text-slate-900 mb-6">Din Bygglovskoll</h1>
+
+      {svarTill && (
+        <p className="rounded-xl bg-brand-50 border border-brand-100 p-5 text-slate-800 leading-relaxed mb-8">
+          {fragaLeverans(svarTill)}
+        </p>
+      )}
 
       <div className="flex flex-wrap gap-3 mb-8">
         <button type="button" onClick={() => laddaNerPdf(orientering)} className="btn-primary">

@@ -33,7 +33,8 @@ const intake: Intake = {
   avstandTomtgrans: 6, fastighetstyp: "villa", kommun: "Uppsala",
   fastighetsbeteckning: "UPPSALA KVARNBO 1:23", detaljplan: "ja", naraVatten: "nej",
   kulturSamfallighet: "nej", befintligaKomplement: "nej", befintligKomplementYta: null,
-  installation: "nej", fritext: "en fritext som aldrig skickas till Stripe", epost: "a@b.se",
+  installation: "nej", fritext: "en fritext som aldrig skickas till Stripe",
+  fraga: "", epost: "a@b.se",
 };
 
 function session(over: Record<string, unknown> = {}) {
@@ -139,7 +140,8 @@ describe("metadata-serialisering", () => {
   it("tur och retur bevarar allt utom fritexten", async () => {
     const { metadataTillIntake } = await import("../src/lib/bygglovskoll/state");
     const tillbaka = metadataTillIntake(intakeTillMetadata(intake));
-    expect(tillbaka).toEqual({ ...intake, fritext: "" });
+    // Fritexten och frågan skickas aldrig till Stripe och kommer tillbaka tomma.
+    expect(tillbaka).toEqual({ ...intake, fritext: "", fraga: "" });
   });
 
   it("håller sig inom Stripes gränser", () => {

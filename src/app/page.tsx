@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import LeadForm from "@/components/LeadForm";
+import HeroVal from "@/components/HeroVal";
+import { bygglovskollAktiv } from "@/lib/bygglovskoll/flag";
 import { getAllKommuner, normalizeKommunSlug } from "@/lib/content";
 import { getAtgarderGrid } from "@/lib/atgarder";
 import { pelarguider } from "@/lib/lankar";
@@ -44,12 +46,21 @@ export default function HomePage() {
   const kommunCount = getAllKommuner().length;
   const guider = pelarguider();
 
-  const stats = [
-    { value: `${kommunCount}`, label: "Kommunguider" },
-    { value: `${atgarder.length}`, label: "Åtgärdstyper" },
-    { value: "Gratis", label: "Konsultmatchning" },
-    { value: "24h", label: "Svarstid" },
-  ];
+  const bygglovskoll = bygglovskollAktiv();
+
+  // Med Bygglovskoll på finns ingen gratis konsultmatchning och inget löfte om
+  // svarstid — de två posterna tas bort i stället för att stå kvar osanna.
+  const stats = bygglovskoll
+    ? [
+        { value: `${kommunCount}`, label: "Kommunguider" },
+        { value: `${atgarder.length}`, label: "Åtgärdstyper" },
+      ]
+    : [
+        { value: `${kommunCount}`, label: "Kommunguider" },
+        { value: `${atgarder.length}`, label: "Åtgärdstyper" },
+        { value: "Gratis", label: "Konsultmatchning" },
+        { value: "24h", label: "Svarstid" },
+      ];
 
   return (
     <>
@@ -86,7 +97,9 @@ export default function HomePage() {
                 samlat på ett ställe
               </h1>
               <p className="text-lg text-brand-100 leading-relaxed mb-8 max-w-lg">
-                Förstå vad som kräver bygglov, hur du ansöker och vad det kostar. Hitta din kommuns specifika regler och matcha med en lokal konsult.
+                {bygglovskoll
+                  ? "Förstå vad som kräver bygglov, hur du ansöker och vad det kostar. Hitta din kommuns specifika regler."
+                  : "Förstå vad som kräver bygglov, hur du ansöker och vad det kostar. Hitta din kommuns specifika regler och matcha med en lokal konsult."}
               </p>
               <div className="flex flex-wrap gap-3">
                 <Link href="/atgard" className="btn-primary bg-white text-brand-900 hover:bg-brand-50 shadow-lg">
@@ -99,7 +112,7 @@ export default function HomePage() {
               </div>
 
               {/* Stats */}
-              <div className="grid grid-cols-4 gap-4 mt-12 pt-8 border-t border-white/10">
+              <div className={`grid gap-4 mt-12 pt-8 border-t border-white/10 ${bygglovskoll ? "grid-cols-2 max-w-xs" : "grid-cols-4"}`}>
                 {stats.map((s) => (
                   <div key={s.label}>
                     <div className="font-display text-2xl font-bold text-white">{s.value}</div>
@@ -109,9 +122,9 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Lead form in hero */}
+            {/* Hero-ingång: tvåvägsval med flaggan på, annars leadformuläret. */}
             <div className="animate-fade-in-up animate-delay-200">
-              <LeadForm source="hero" />
+              {bygglovskoll ? <HeroVal /> : <LeadForm source="hero" bygglovskoll={false} />}
             </div>
           </div>
         </div>

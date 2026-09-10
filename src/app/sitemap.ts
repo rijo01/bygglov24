@@ -25,17 +25,24 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${BASE}/guide`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.9 },
     { url: `${BASE}/kommun`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.9 },
     { url: `${BASE}/hjalp-med-bygglov`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.9 },
-    { url: `${BASE}/konsult`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.85 },
     { url: `${BASE}/kalkylator`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.8 },
   ];
 
-  // Bakom feature-flagga: får aldrig ligga i sitemapen när tjänsten är av.
+  // Bakom feature-flagga: /bygglovskoll får aldrig ligga i sitemapen när
+  // tjänsten är av, och /konsult aldrig när den är på — då redirectar den.
   if (bygglovskollAktiv()) {
     staticPages.push({
       url: `${BASE}/bygglovskoll`,
       lastModified: new Date(),
       changeFrequency: "monthly",
       priority: 0.9,
+    });
+  } else {
+    staticPages.push({
+      url: `${BASE}/konsult`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.85,
     });
   }
 

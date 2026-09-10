@@ -43,7 +43,7 @@ export const VAD_DU_FAR = [
   "Sannolik klassning (tillbyggnad, komplementbyggnad, fasadändring, plank/mur eller annan) och varför",
   "Regler som gäller för den klassningen efter PBL-reformen 1 december 2025",
   "Hur dina mått ligger mot de nationella trösklarna",
-  "Det vi inte kan se — och exakt vad du ska kontrollera",
+  "Det som avgör ditt fall — och exakt vad du ska kontrollera",
   "Frågor att ställa till kommunen",
   "Nästa steg, inklusive när en fastighetsspecifik utredning är motiverad",
 ];
@@ -65,9 +65,11 @@ export const FOR_VEM =
   "ett strukturerat underlag innan du kontaktar kommunen.";
 
 export const FOR_VEM_INTE =
-  "Den passar inte när ärendet är komplext (strandskydd, kulturmiljö, BRF, installation av " +
-  "vatten/avlopp/eldstad, oklart avstånd till tomtgräns, mått nära en tröskel). Då visar vi det " +
-  "innan du betalar och hänvisar till Bygglovsutredning, 2 950 kr.";
+  "Har ärendet komplicerande omständigheter — strandskydd, kulturmiljö, BRF, installation av " +
+  "vatten/avlopp/eldstad, oklart avstånd till tomtgräns eller mått nära en tröskel — blir de i " +
+  "stället innehåll i underlaget: vilka de är, varför de spelar roll och vad du ska kontrollera. " +
+  "Vi visar dem innan du betalar. Behöver du en fastighetsspecifik genomgång är Bygglovsutredning, " +
+  "2 950 kr, nästa steg.";
 
 export const FAQ_LANDNING: Array<{ f: string; s: string }> = [
   {
@@ -79,8 +81,12 @@ export const FAQ_LANDNING: Array<{ f: string; s: string }> = [
     s: "Utfallet beror på detaljplan, kvarvarande byggrätt, redan förbrukad lovfri pott, strandskydd, kulturmiljö och avstånd till gräns. Det syns inte i ett formulär.",
   },
   {
-    f: "Vad händer om mitt ärende är för komplext?",
-    s: "Då säljs inte Bygglovskoll. Du får en kort förklaring och erbjudande om Bygglovsutredning (2 950 kr).",
+    f: "Vad händer om mitt ärende har komplicerande omständigheter?",
+    s: "Då är de en del av underlaget. Din Bygglovskoll listar varje omständighet, varför den spelar roll och exakt vad du ska kontrollera med kommunen. Behövs en fastighetsspecifik genomgång erbjuds Bygglovsutredning (2 950 kr) som nästa steg.",
+  },
+  {
+    f: "Kan jag få ett personligt svar på en egen fråga?",
+    s: "Ja, som tillägg för 400 kr. Du skriver din fråga i formuläret och får ett skriftligt svar från Bygglov24 inom två arbetsdagar. Det är vägledning utifrån dina uppgifter — inte kommunens beslut.",
   },
   {
     f: "Behöver ni fastighetsbeteckning?",
@@ -122,12 +128,51 @@ export function plankKraverByggnadsavstand(
   );
 }
 
-export const B_RUBRIK = "Ditt ärende kräver en utredning";
+/**
+ * v1.1: utfall B avvisar inte längre. B leder till samma köpsida som A — 99 kr
+ * köper vägledning och underlag, aldrig ett ja eller nej, och komplexitet är
+ * innehåll i produkten i stället för skäl att vägra sälja. Väggen «Ditt ärende
+ * kräver en utredning» och den fria frågelistan utan köp är därför borta;
+ * frågorna är numera en del av produkten.
+ */
+export const B_KOP_BROD =
+  "Ditt ärende har omständigheter som måste kontrolleras mot kommunen — din Bygglovskoll listar " +
+  "exakt vilka, varför de spelar roll och hur du kontrollerar dem.";
 
-export const B_BROD =
-  "Bygglovskoll är avsedd för avgränsade projekt där de nationella trösklarna räcker som " +
-  "orientering. I ditt fall finns minst en omständighet som vi inte kan hantera i ett " +
-  "standardunderlag:";
+/** Rubrik på listan över omständigheter, både på köpsidan och i underlaget. */
+export const B_OMSTANDIGHETER_RUBRIK = "Det här har vi hittat i dina uppgifter";
+
+/**
+ * B2, B3 och B5 utlöses av två skilda svar — «ja» och «vet ej» — och en enda
+ * gemensam text ("… eller så är det oklart") gjorde det omöjligt att se vilket
+ * av dem som låg bakom flaggan, både för kunden och för oss. Varje flagga har
+ * därför två varianter: en som återger ett ja, en som återger ett vet ej.
+ * Orsakskoden är densamma i båda fallen; bara texten skiljer.
+ */
+export const B2_JA =
+  "Du angav att tomten ligger nära hav, sjö eller vattendrag. Strandskydd prövas separat och kan " +
+  "kräva dispens oavsett bygglovsfrågan.";
+
+export const B2_VETEJ =
+  "Du angav att du inte vet om tomten ligger nära hav, sjö eller vattendrag. Strandskydd prövas " +
+  "separat och kan kräva dispens oavsett bygglovsfrågan.";
+
+export const B3_JA =
+  "Du angav att byggnaden eller området är kulturhistoriskt utpekat, eller att fastigheten ligger " +
+  "inom samfällighet eller BRF. Det kan utlösa utökad lovplikt för åtgärder som annars inte kräver lov.";
+
+export const B3_VETEJ =
+  "Du angav att du inte vet om byggnaden eller området är kulturhistoriskt utpekat, eller om " +
+  "fastigheten ligger inom samfällighet eller BRF. Det kan utlösa utökad lovplikt för åtgärder som " +
+  "annars inte kräver lov.";
+
+export const B5_JA =
+  "Du angav att vatten, avlopp, ventilation eller eldstad installeras. Teknisk anmälan kan krävas " +
+  "även när byggnaden i sig är lovfri.";
+
+export const B5_VETEJ =
+  "Du angav att du inte vet om vatten, avlopp, ventilation eller eldstad installeras. Teknisk " +
+  "anmälan kan krävas även när byggnaden i sig är lovfri.";
 
 export const B_UTREDNING =
   "Bygglovsutredning, 2 950 kr: fastighetsspecifik genomgång av detaljplan, byggrätt, strandskydd " +
@@ -140,6 +185,46 @@ export function bGratischunk(kommun: string): string {
     "och ev. dispens, (4) avstånd till tomtgräns och ev. grannmedgivande. Det bindande beskedet " +
     "ges av nämnden."
   );
+}
+
+// ── Tillägget «Fråga oss» (v1.1) ────────────────────────────────────────────
+
+/** Priser i kronor inkl. moms. Stripe är källan; de här är copyns siffror. */
+export const PRIS_BAS_KR = 99;
+export const PRIS_TILLAGG_KR = 400;
+export const PRIS_MED_SVAR_KR = PRIS_BAS_KR + PRIS_TILLAGG_KR;
+
+export const FRAGA_ETIKETT = "Din fråga (valfritt)";
+
+export const FRAGA_HJALP =
+  "Har du en egen fråga om projektet kan du skriva den här. Den används bara om du väljer " +
+  "tillägget nedan, och den går aldrig till Stripe — bara till oss.";
+
+export const FRAGA_KRYSS =
+  "Jag vill också ha ett personligt skriftligt svar på min fråga inom två arbetsdagar (+400 kr)";
+
+/**
+ * Verbatim-förbehåll för tillägget. Visas på köpsidan och i underlaget.
+ *
+ * Obs: frasen innehåller ordet «svaret» i betydelsen «det skriftliga svar vi
+ * skickar», inte i betydelsen «rätt svar på lovfrågan» som förbjudna-fraser-
+ * listan är skriven mot. Den är därför undantagen i lint-testet, på samma sätt
+ * som negationerna i VAD_DET_INTE_AR.
+ */
+export const FRAGA_FORBEHALL =
+  "Det personliga svaret är vägledning från Bygglov24 utifrån dina uppgifter — inte ett besked om " +
+  "lov, inte kommunens beslut och inte juridisk rådgivning.";
+
+/**
+ * Vad kunden faktiskt köper i tillägget. Står på köpsidan bredvid förbehållet:
+ * en bedömning att agera på mot kommunen, inte ett avgörande av lovfrågan.
+ */
+export const FRAGA_VAD_DU_FAR =
+  "Vi läser din fråga och återkommer skriftligt inom två arbetsdagar med vår bedömning av vad som " +
+  "gäller för ditt projekt och vad du bör kontrollera.";
+
+export function fragaLeverans(epost: string): string {
+  return `Din Bygglovskoll är klar nedan. Ditt personliga svar skickas till ${epost} inom två arbetsdagar.`;
 }
 
 export const C_RUBRIK = "Det här ligger utanför Bygglovskoll";
