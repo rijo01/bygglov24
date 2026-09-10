@@ -4,6 +4,7 @@ import { triage } from "@/lib/bygglovskoll/triage";
 import { intakeHash, signera, intakeTillMetadata, COOKIE_NAMN } from "@/lib/bygglovskoll/state";
 import { RULES_VERSION } from "@/lib/bygglovskoll/rules";
 import { bygglovskollAktiv } from "@/lib/bygglovskoll/flag";
+import { harledOrigin } from "@/lib/bygglovskoll/origin";
 import { felIIntake, felIKopval } from "@/lib/bygglovskoll/validering";
 import type { Intake, Kopval } from "@/lib/bygglovskoll/types";
 
@@ -69,15 +70,18 @@ export async function POST(req: NextRequest) {
       : process.env.STRIPE_PRICE_BYGGLOVSKOLL;
     if (!priceId) return NextResponse.json({ error: "Pris saknas i konfigurationen." }, { status: 500 });
 
-    const bas = process.env.NEXT_PUBLIC_SITE_URL || "https://bygglov24.se";
+    // Returen måste gå tillbaka till den värd som startade köpet. Byggdes den
+    // från en fast domän landade en betalning som startats på preview på
+    // produktion, där tjänsten är avstängd — kunden betalade och fick 404.
+    const origin = harledOrigin(req.headers);
     const hash = intakeHash(intake);
 
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
       locale: "sv",
       line_items: [{ price: priceId, quantity: 1 }],
-      success_url: `${bas}/bygglovskoll/klar?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${bas}/bygglovskoll?avbruten=1`,
+      success_url: `${origin}/bygglovskoll/klar?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${origin}/bygglovskoll?avbrutet=1`,
       customer_email: intake.epost || undefined,
       // Metadatan bär hela intaket utom fritexten och är källan vid leverans.
       // Underlaget kan därmed byggas av enbart session_id, oberoende av

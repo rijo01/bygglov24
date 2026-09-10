@@ -57,8 +57,8 @@ function payload(over: Record<string, unknown> = {}) {
   };
 }
 
-function req(kropp: unknown) {
-  return { json: async () => kropp } as never;
+function req(kropp: unknown, headers: Record<string, string> = {}) {
+  return { json: async () => kropp, headers: new Headers(headers) } as never;
 }
 
 beforeEach(() => {
@@ -256,6 +256,105 @@ describe("intag: formulärets payload hela vägen till triagen", () => {
     expect(res.status).toBe(400);
     expect((await res.json()).error).toContain("kryssrutorna");
     expect(create).not.toHaveBeenCalled();
+  });
+
+  /**
+   * Returadresserna byggdes tidigare från en fast domän. En betalning som
+   * startats på en preview-deploy landade därför på produktion, där
+   * BYGGLOVSKOLL_ENABLED är av — kunden betalade och fick 404. Returen ska
+   * följa anropets värd, men bara om den värden är vår.
+   */
+  describe("returadresserna följer anropets värd", () => {
+    const PREVIEW = "bygglov24-b1e5l78yk-rickards-projects-741176ef.vercel.app";
+
+    async function urls(headers: Record<string, string>) {
+      create.mockClear();
+      await POST(req(payload(), headers));
+      const { success_url, cancel_url } = create.mock.calls[0][0];
+      return { success_url, cancel_url };
+    }
+
+    it("preview-host ger preview-host i båda adresserna", async () => {
+      const { success_url, cancel_url } = await urls({
+        "x-forwarded-host": PREVIEW,
+        "x-forwarded-proto": "https",
+      });
+      expect(success_url).toBe(`https://${PREVIEW}/bygglovskoll/klar?session_id={CHECKOUT_SESSION_ID}`);
+      expect(cancel_url).toBe(`https://${PREVIEW}/bygglovskoll?avbrutet=1`);
+    });
+
+    it("produktionsdomänen ger produktionsdomänen", async () => {
+      const { success_url, cancel_url } = await urls({ "x-forwarded-host": "bygglov24.se" });
+      expect(success_url).toBe("https://bygglov24.se/bygglovskoll/klar?session_id={CHECKOUT_SESSION_ID}");
+      expect(cancel_url).toBe("https://bygglov24.se/bygglovskoll?avbrutet=1");
+    });
+
+    it("www ger www", async () => {
+      const { success_url } = await urls({ "x-forwarded-host": "www.bygglov24.se" });
+      expect(success_url).toContain("https://www.bygglov24.se/bygglovskoll/klar");
+    });
+
+    it("okänd host reflekteras aldrig, utan faller tillbaka på bygglov24.se", async () => {
+      for (const host of [
+        "evil.example",
+        "bygglov24.se.evil.example",
+        "bygglov24-x-rickards-projects-741176ef.vercel.app.evil.example",
+        "evil-bygglov24-x-rickards-projects-741176ef.vercel.app",
+        "bygglov24-x-nagon-annan-projects.vercel.app",
+        "evil.example/bygglov24.se",
+      ]) {
+        const { success_url, cancel_url } = await urls({ "x-forwarded-host": host });
+        expect(success_url, `${host} reflekterades`).toBe(
+          "https://bygglov24.se/bygglovskoll/klar?session_id={CHECKOUT_SESSION_ID}",
+        );
+        expect(cancel_url, `${host} reflekterades i cancel_url`).toBe(
+          "https://bygglov24.se/bygglovskoll?avbrutet=1",
+        );
+      }
+    });
+
+    it("Origin-headern duger när x-forwarded-host saknas", async () => {
+      const { success_url } = await urls({ origin: `https://${PREVIEW}` });
+      expect(success_url).toContain(`https://${PREVIEW}/bygglovskoll/klar`);
+    });
+
+    it("en okänd Origin faller också tillbaka", async () => {
+      const { success_url } = await urls({ origin: "https://evil.example" });
+      expect(success_url).toContain("https://bygglov24.se/bygglovskoll/klar");
+    });
+
+    it("utan headers alls blir det den kanoniska domänen", async () => {
+      const { success_url, cancel_url } = await urls({});
+      expect(success_url).toContain("https://bygglov24.se/bygglovskoll/klar");
+      expect(cancel_url).toBe("https://bygglov24.se/bygglovskoll?avbrutet=1");
+    });
+
+    it("protokollet kan inte nedgraderas till http via header", async () => {
+      const { success_url, cancel_url } = await urls({
+        "x-forwarded-host": PREVIEW,
+        "x-forwarded-proto": "http",
+      });
+      expect(success_url.startsWith("https://")).toBe(true);
+      expect(cancel_url.startsWith("https://")).toBe(true);
+    });
+
+    it("en proxykedja med flera värden använder den första", async () => {
+      const { success_url } = await urls({ "x-forwarded-host": `${PREVIEW}, evil.example` });
+      expect(success_url).toContain(`https://${PREVIEW}/bygglovskoll/klar`);
+    });
+
+    it("localhost duger lokalt men aldrig på Vercel", async () => {
+      const { success_url: lokalt } = await urls({
+        "x-forwarded-host": "localhost:3100",
+        "x-forwarded-proto": "http",
+      });
+      expect(lokalt).toContain("http://localhost:3100/bygglovskoll/klar");
+
+      process.env.VERCEL = "1";
+      const { success_url: paVercel } = await urls({ "x-forwarded-host": "localhost:3100" });
+      delete process.env.VERCEL;
+      expect(paVercel).toContain("https://bygglov24.se/bygglovskoll/klar");
+    });
   });
 
   it("feature-flaggan stänger rutten helt", async () => {

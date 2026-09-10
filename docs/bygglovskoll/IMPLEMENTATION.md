@@ -129,6 +129,20 @@ tillägg ger 409.
 Triagen körs **om på servern** både vid checkout och vid verifiering. Klienten
 kan aldrig påstå vilket utfall ett fall har.
 
+**Returadresserna följer anropets värd.** `success_url` och `cancel_url` byggdes
+först från en fast domän. En betalning som startats på en preview-deploy landade
+därför på produktion, där `BYGGLOVSKOLL_ENABLED` är av — kunden betalade och
+fick 404. `lib/bygglovskoll/origin.ts` härleder i stället origin ur
+`x-forwarded-host` (annars `Origin`, annars `Host`).
+
+Värden reflekteras aldrig rakt av: headern sätts av anroparen, och skrevs den in
+i `success_url` vore Checkout-sessionen en öppen vidarebefordran som dessutom bär
+vårt session-id. Allowlisten är `bygglov24.se`, `www.bygglov24.se` och projektets
+egna preview-värdar (`bygglov24-…-rickards-projects-741176ef.vercel.app`, både
+prefix och suffix krävs). Localhost tillåts bara när `VERCEL` inte är satt. Allt
+annat faller tillbaka på `https://bygglov24.se`, och https tvingas för allt utom
+lokal utveckling så att protokollet inte kan nedgraderas via en header.
+
 ## Obesvarat får aldrig bli «vet ej»
 
 Triagen är konservativ men tyst: ett tre-lägesfält som varken är `ja`, `nej`
