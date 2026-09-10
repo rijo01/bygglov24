@@ -1,4 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import type { Intake } from "../src/lib/bygglovskoll/types";
 
 /**
@@ -189,6 +191,27 @@ describe("klar-sidans leveranstext", () => {
     expect(utan.orientering.personligtSvar).toBe(false);
   });
 
+  it("förbehållet för tillägget står ordagrant", async () => {
+    const { FRAGA_FORBEHALL, FRAGA_VAD_DU_FAR } = await import("../src/lib/bygglovskoll/copy");
+    // Verbatim-krav. Svaret är en bedömning att agera på mot kommunen — och
+    // varken ett besked om lov, kommunens beslut eller juridisk rådgivning.
+    expect(FRAGA_FORBEHALL).toBe(
+      "Det personliga svaret är vägledning från Bygglov24 utifrån dina uppgifter — inte ett besked " +
+        "om lov, inte kommunens beslut och inte juridisk rådgivning.",
+    );
+    expect(FRAGA_VAD_DU_FAR).toBe(
+      "Vi läser din fråga och återkommer skriftligt inom två arbetsdagar med vår bedömning av vad " +
+        "som gäller för ditt projekt och vad du bör kontrollera.",
+    );
+  });
+
+  it("köpsidan visar vad tillägget är, inte bara att det finns", () => {
+    const kalla = readFileSync(resolve(__dirname, "../src/app/bygglovskoll/BygglovskollForm.tsx"), "utf8");
+    // Raden och förbehållet står i samma block som kryssrutans pris.
+    expect(kalla).toContain("copy.FRAGA_VAD_DU_FAR");
+    expect(kalla).toContain("copy.FRAGA_FORBEHALL");
+  });
+
   it("texten namnger e-postadressen och två arbetsdagar", async () => {
     const { fragaLeverans } = await import("../src/lib/bygglovskoll/copy");
     const text = fragaLeverans("anna@exempel.se");
@@ -202,9 +225,8 @@ describe("förbjudna fraser i tilläggets copy", () => {
   it("brevtexten och förbehållet är rena", async () => {
     const { byggBrevtext } = await import("../src/lib/bygglovskoll/fraga-oss");
     const { triage } = await import("../src/lib/bygglovskoll/triage");
-    const { FRAGA_FORBEHALL, FRAGA_KRYSS, FRAGA_ETIKETT, FRAGA_HJALP } = await import(
-      "../src/lib/bygglovskoll/copy"
-    );
+    const { FRAGA_FORBEHALL, FRAGA_KRYSS, FRAGA_ETIKETT, FRAGA_HJALP, FRAGA_VAD_DU_FAR } =
+      await import("../src/lib/bygglovskoll/copy");
     const FORBJUDNA = [
       "rätt svar", "få besked", "vi avgör", "du behöver inte bygglov",
       "du kan bygga", "garanterat", "juridiskt bindande", "hundratals", "nöjda kunder",
@@ -214,6 +236,7 @@ describe("förbjudna fraser i tilläggets copy", () => {
       FRAGA_KRYSS,
       FRAGA_ETIKETT,
       FRAGA_HJALP,
+      FRAGA_VAD_DU_FAR,
       // FRAGA_FORBEHALL innehåller «svaret» i betydelsen skriftligt svar; det
       // ordet prövas därför inte här, se undantaget i forbidden-phrases.
       FRAGA_FORBEHALL,

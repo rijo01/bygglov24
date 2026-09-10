@@ -212,8 +212,16 @@ export const FRAGA_KRYSS =
  * som negationerna i VAD_DET_INTE_AR.
  */
 export const FRAGA_FORBEHALL =
-  "Det personliga svaret är vägledning från Bygglov24 utifrån dina uppgifter — inte kommunens " +
-  "beslut och inte juridisk rådgivning.";
+  "Det personliga svaret är vägledning från Bygglov24 utifrån dina uppgifter — inte ett besked om " +
+  "lov, inte kommunens beslut och inte juridisk rådgivning.";
+
+/**
+ * Vad kunden faktiskt köper i tillägget. Står på köpsidan bredvid förbehållet:
+ * en bedömning att agera på mot kommunen, inte ett avgörande av lovfrågan.
+ */
+export const FRAGA_VAD_DU_FAR =
+  "Vi läser din fråga och återkommer skriftligt inom två arbetsdagar med vår bedömning av vad som " +
+  "gäller för ditt projekt och vad du bör kontrollera.";
 
 export function fragaLeverans(epost: string): string {
   return `Din Bygglovskoll är klar nedan. Ditt personliga svar skickas till ${epost} inom två arbetsdagar.`;

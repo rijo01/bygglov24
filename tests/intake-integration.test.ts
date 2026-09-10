@@ -160,6 +160,47 @@ describe("intag: formulärets payload hela vägen till triagen", () => {
     expect(anrop.metadata.reasons).toBe("B5");
   });
 
+  /**
+   * Priset styrs ENBART av krysset, aldrig av utfallet. Ett B-ärende är inte
+   * dyrare än ett A-ärende — det är samma produkt med fler omständigheter i.
+   * Matrisen körs som en tabell så att en ny prisgren i rutten inte kan smyga
+   * in en utfallsberoende prissättning utan att ett fall här går sönder.
+   *
+   * Beloppen sitter i Stripe, inte i koden: price_test_bygglovskoll är 9 900
+   * öre och price_test_bygglovskoll_svar 49 900 öre i testkontot.
+   */
+  describe("priset följer krysset, inte utfallet", () => {
+    const A = payload();
+    const B = payload({ naraVatten: "vetej" });
+    const MED_FRAGA = { fraga: "Räknas mitt gamla förråd mot potten?" };
+
+    const MATRIS: Array<[string, "A" | "B", Record<string, unknown>, boolean, string]> = [
+      ["A utan kryss", "A", {}, false, "price_test_bygglovskoll"],
+      ["A med kryss och fråga", "A", MED_FRAGA, true, "price_test_bygglovskoll_svar"],
+      ["B utan kryss", "B", {}, false, "price_test_bygglovskoll"],
+      ["B med kryss och fråga", "B", MED_FRAGA, true, "price_test_bygglovskoll_svar"],
+    ];
+
+    it.each(MATRIS)("%s -> %s", async (namn, utfall, extra, kryss, forvantatPris) => {
+      const intake = { ...(utfall === "A" ? A : B).intake, ...extra };
+      const res = await POST(req({ intake, samtycken: { vagledning: true, angerratt: true }, kopval: { personligtSvar: kryss } }));
+      expect(res.status, namn).toBe(200);
+      const anrop = create.mock.calls[0][0];
+      expect(anrop.metadata.outcome, `${namn}: fel utfall`).toBe(utfall);
+      expect(anrop.line_items, `${namn}: fel pris`).toEqual([{ price: forvantatPris, quantity: 1 }]);
+    });
+
+    it("kopval utelämnat helt är samma sak som okryssat", async () => {
+      for (const kropp of [payload(), payload({ naraVatten: "vetej" })]) {
+        create.mockClear();
+        await POST(req(kropp));
+        expect(create.mock.calls[0][0].line_items).toEqual([
+          { price: "price_test_bygglovskoll", quantity: 1 },
+        ]);
+      }
+    });
+  });
+
   describe("tillägget «Fråga oss» väljer pris", () => {
     it("utan kryss: baspriset", async () => {
       await POST(req({ ...payload(), kopval: { personligtSvar: false } }));

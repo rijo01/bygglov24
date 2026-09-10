@@ -265,8 +265,9 @@ export default function BygglovskollForm({ kommuner }: { kommuner: string[] }) {
             <h3 className="font-semibold text-slate-900 text-sm mb-1.5">
               Tillägg: personligt svar (+{copy.PRIS_TILLAGG_KR} kr)
             </h3>
+            <p className="text-sm text-slate-700 leading-relaxed mb-2">{copy.FRAGA_VAD_DU_FAR}</p>
             <p className="text-sm text-slate-700 leading-relaxed mb-2">
-              Du får ett skriftligt svar på din fråga till {i.epost} inom två arbetsdagar.
+              Vi skickar det till {i.epost}.
             </p>
             <p className="text-sm text-slate-700 leading-relaxed">{copy.FRAGA_FORBEHALL}</p>
           </div>
