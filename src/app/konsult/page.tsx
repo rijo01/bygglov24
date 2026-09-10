@@ -32,7 +32,10 @@ export default function KonsultPage() {
   // Sidan beskriver en kostnadsfri konsultmatchning där konsulten betalar en
   // matchningsavgift. Det nätverket finns inte. Med Bygglovskoll påslagen
   // skickas trafiken i stället till de tjänster vi faktiskt levererar.
-  // 307 (temporär) — sidan kan komma tillbaka om matchningen byggs på riktigt.
+  //
+  // Den permanenta 301:an ligger i next.config.ts och fångar anropet före
+  // routingen; den här raden är kvarvarande skydd om posten någon gång tas bort
+  // ur konfigurationen, och gäller även under prerenderingen.
   if (bygglovskollAktiv()) redirect("/hjalp-med-bygglov");
 
   return (

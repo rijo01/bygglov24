@@ -8,6 +8,14 @@ import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 
 const URSPRUNG = process.env.BYGGLOVSKOLL_ENABLED;
 
+/** /konsult-posten i next.config.ts, för den flagga som är satt just nu. */
+async function konsultRedirect() {
+  vi.resetModules();
+  const { default: config } = await import("../next.config");
+  const poster = await config.redirects!();
+  return poster.find((r) => r.source === "/konsult");
+}
+
 beforeEach(() => {
   vi.resetModules();
 });
@@ -45,6 +53,10 @@ describe("flaggan av", () => {
   it("sitemapen innehåller /konsult", async () => {
     const { default: sitemap } = await import("../src/app/sitemap");
     expect(sitemap().map((e) => e.url)).toContain("https://bygglov24.se/konsult");
+  });
+
+  it("/konsult redirectas inte alls — sidan renderar", async () => {
+    expect(await konsultRedirect()).toBeUndefined();
   });
 
   it("MDX-CTA:erna lämnas orörda", async () => {
@@ -93,6 +105,17 @@ describe("flaggan på", () => {
     const { default: Page } = await import("../src/app/konsult/page");
     // redirect() kastar ett NEXT_REDIRECT-fel.
     expect(() => Page()).toThrowError(/NEXT_REDIRECT|redirect/i);
+  });
+
+  it("/konsult är en permanent 301, inte en temporär redirect", async () => {
+    // Sidan är borta för gott, inte pausad. En temporär status (307/308 via
+    // permanent-flaggan) säger fel sak till Google och till webbläsarcachen.
+    const post = await konsultRedirect();
+    expect(post).toBeDefined();
+    expect(post).toMatchObject({ destination: "/hjalp-med-bygglov", statusCode: 301 });
+    // statusCode och permanent utesluter varandra i Next — sätts båda blir det
+    // 308 och 301:an tyst borta.
+    expect(post).not.toHaveProperty("permanent");
   });
 
   it("MDX-CTA:erna saneras", async () => {

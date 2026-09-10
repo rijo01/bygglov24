@@ -1,5 +1,12 @@
 import type { NextConfig } from "next";
 
+/**
+ * Samma flagga som lib/bygglovskoll/flag.ts, läst vid bygget. Konfigurationen
+ * kan inte importera modulen — next.config körs innan alias-upplösningen — så
+ * villkoret upprepas här. Allt utom exakt "true" håller tjänsten avstängd.
+ */
+const bygglovskollAktiv = process.env.BYGGLOVSKOLL_ENABLED === "true";
+
 const nextConfig: NextConfig = {
   pageExtensions: ["ts", "tsx", "mdx"],
   images: {
@@ -7,6 +14,20 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return [
+      // ── Lansering av Bygglovskoll ───────────────────────────────────────
+      // /konsult beskrev en kostnadsfri konsultmatchning som inte finns. Med
+      // Bygglovskoll live är sidan borta för gott, inte tillfälligt pausad, och
+      // 301 säger det till både Google och webbläsarnas cache. Sidkomponenten
+      // har kvar sin egen redirect som skydd — den träffar aldrig ett riktigt
+      // anrop eftersom konfigurationen fångar det före routingen.
+      //
+      // statusCode 301 i stället för permanent: true (=308), samma val som i
+      // saneringen längre ned. Med flaggan av finns posten inte alls och sidan
+      // renderar som förut.
+      ...(bygglovskollAktiv
+        ? [{ source: "/konsult", destination: "/hjalp-med-bygglov", statusCode: 301 }]
+        : []),
+
       // Kanonisk värd: www -> apex (non-www). Kodnivå-skydd utöver Vercels primary domain
       // så att SEO-signalerna konsolideras till https://bygglov24.se.
       {
