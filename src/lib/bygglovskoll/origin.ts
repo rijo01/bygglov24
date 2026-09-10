@@ -23,8 +23,13 @@ const KANONISKA_VARDAR = new Set(["bygglov24.se", "www.bygglov24.se"]);
  * `bygglov24-<deploy eller gren>-rickards-projects-741176ef.vercel.app`.
  * Både prefixet och suffixet krävs, så varken `evil-bygglov24-…` eller
  * `bygglov24-…-rickards-projects-741176ef.vercel.app.evil.com` matchar.
+ *
+ * Projektaliaset utan mellanled — `bygglov24-rickards-projects-741176ef
+ * .vercel.app` — är också vårt och pekar på senaste produktionsdeploy. Utan
+ * det faller ett köp som startats där tillbaka på produktionsdomänen, vilket
+ * är exakt den retur den här modulen finns för att undvika.
  */
-const PREVIEW_VARD = /^bygglov24-[a-z0-9-]+-rickards-projects-741176ef\.vercel\.app$/;
+const PREVIEW_VARD = /^bygglov24-(?:[a-z0-9-]+-)?rickards-projects-741176ef\.vercel\.app$/;
 
 /** Lokal utveckling. Tillåts bara utanför Vercel, se harledOrigin. */
 const LOKAL_VARD = /^(localhost|127\.0\.0\.1)(:\d{1,5})?$/;

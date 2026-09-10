@@ -313,6 +313,16 @@ describe("intag: formulärets payload hela vägen till triagen", () => {
       }
     });
 
+    it("projektets grenalias och projektalias räknas som våra", async () => {
+      for (const host of [
+        "bygglov24-git-feat-cta-bygglovskoll-rickards-projects-741176ef.vercel.app",
+        "bygglov24-rickards-projects-741176ef.vercel.app",
+      ]) {
+        const { success_url } = await urls({ "x-forwarded-host": host });
+        expect(success_url, `${host} borde vara tillåten`).toContain(`https://${host}/bygglovskoll/klar`);
+      }
+    });
+
     it("Origin-headern duger när x-forwarded-host saknas", async () => {
       const { success_url } = await urls({ origin: `https://${PREVIEW}` });
       expect(success_url).toContain(`https://${PREVIEW}/bygglovskoll/klar`);
