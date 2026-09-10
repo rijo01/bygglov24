@@ -1,6 +1,7 @@
 "use client";
 import { useId, useState } from "react";
 import { Icon, type IconName } from "@/lib/icons";
+import { WEB3FORMS_ACCESS_KEY, WEB3FORMS_ENDPOINT } from "@/lib/web3forms";
 
 interface LeadFormProps {
   source?: string;
@@ -70,14 +71,14 @@ export default function LeadForm({
       .join("\n");
 
     try {
-      const res = await fetch("https://api.web3forms.com/submit", {
+      const res = await fetch(WEB3FORMS_ENDPOINT, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
         },
         body: JSON.stringify({
-          access_key: "c666ec4f-ba04-4e5b-9403-31d6accf8dd8",
+          access_key: WEB3FORMS_ACCESS_KEY,
           subject: "Ny lead – bygglov24.se",
           from_name: form.name,
           email: form.email,
