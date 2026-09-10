@@ -1,9 +1,8 @@
 "use client";
 import { useMemo, useState } from "react";
-import Link from "next/link";
-import LeadForm from "@/components/LeadForm";
 import { triage } from "@/lib/bygglovskoll/triage";
 import * as copy from "@/lib/bygglovskoll/copy";
+import { FRAGA_MAXLANGD, felIKopval } from "@/lib/bygglovskoll/validering";
 import { GRANS, STRANDSKYDD } from "@/lib/bygglovskoll/rules";
 import type { Intake, JaNejVetEj, TriageResultat } from "@/lib/bygglovskoll/types";
 
@@ -36,6 +35,7 @@ const TOM: Utkast = {
   befintligKomplementYta: null,
   installation: null,
   fritext: "",
+  fraga: "",
   epost: "",
 };
 
@@ -115,7 +115,7 @@ export default function BygglovskollForm({ kommuner }: { kommuner: string[] }) {
   const [kryssAngerratt, setKryssAngerratt] = useState(false);
   const [laddar, setLaddar] = useState(false);
   const [fel, setFel] = useState<string | null>(null);
-  const [visaGratischunk, setVisaGratischunk] = useState(false);
+  const [villHaSvar, setVillHaSvar] = useState(false);
 
   const uppd = (delta: Partial<Utkast>) => setI((prev) => ({ ...prev, ...delta }));
 
@@ -145,9 +145,13 @@ export default function BygglovskollForm({ kommuner }: { kommuner: string[] }) {
       if (i.installation === null) fel.push("Svara på frågan om vatten, avlopp, ventilation eller eldstad.");
       if (!/.+@.+\..+/.test(i.epost)) fel.push("Ange en giltig e-postadress.");
       if (i.fritext.length > 500) fel.push("Beskrivningen får vara högst 500 tecken.");
+      // Kryssad ruta utan fråga: kunden skulle betala 400 kr för ett tomt
+      // uppdrag. Samma kontroll körs om i rutten.
+      const kopvalfel = felIKopval(i, { personligtSvar: villHaSvar });
+      if (kopvalfel) fel.push(kopvalfel);
     }
     return fel;
-  }, [steg, i, behoverMatt]);
+  }, [steg, i, behoverMatt, villHaSvar]);
 
   const kanGaVidare = saknas.length === 0;
 
@@ -176,7 +180,11 @@ export default function BygglovskollForm({ kommuner }: { kommuner: string[] }) {
       const res = await fetch("/api/bygglovskoll/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ intake: komplett, samtycken: { vagledning: kryssVagledning, angerratt: kryssAngerratt } }),
+        body: JSON.stringify({
+          intake: komplett,
+          samtycken: { vagledning: kryssVagledning, angerratt: kryssAngerratt },
+          kopval: { personligtSvar: villHaSvar },
+        }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Kunde inte starta betalningen.");
@@ -201,71 +209,47 @@ export default function BygglovskollForm({ kommuner }: { kommuner: string[] }) {
     );
   }
 
-  if (resultat?.outcome === "B") {
-    return (
-      <div className="space-y-6">
-        <div className="card p-8">
-          <h2 className="font-display text-2xl font-semibold text-slate-900 mb-3">{copy.B_RUBRIK}</h2>
-          <p className="text-slate-700 mb-4 leading-relaxed">{copy.B_BROD}</p>
-          <ul className="space-y-2.5 mb-6">
-            {resultat.reasons.map((r, idx) => (
-              <li key={`${r.kod}-${idx}`} className="flex gap-2.5 text-sm text-slate-700 leading-relaxed">
-                <span className="text-brand-600 mt-0.5" aria-hidden="true">•</span>
-                <span>{r.text}</span>
-              </li>
-            ))}
-          </ul>
-          <div className="rounded-xl bg-brand-50 border border-brand-100 p-5">
-            <h3 className="font-semibold text-slate-900 mb-2">Vad utredningen är</h3>
-            <p className="text-sm text-slate-700 leading-relaxed mb-4">{copy.B_UTREDNING}</p>
-            <Link href="/hjalp-med-bygglov" className="btn-primary text-sm">Begär Bygglovsutredning</Link>
-          </div>
-          <button
-            type="button"
-            onClick={() => setVisaGratischunk(true)}
-            className="mt-4 text-sm font-semibold text-brand-700 hover:text-brand-900 underline"
-          >
-            Jag vill bara ha frågorna att ställa till kommunen
-          </button>
-          {visaGratischunk && (
-            <p className="mt-4 text-sm text-slate-700 leading-relaxed border-l-2 border-brand-200 pl-4">
-              {copy.bGratischunk(i.kommun || "din kommun")}
-            </p>
-          )}
-        </div>
-        <LeadForm
-          source="bygglovskoll-B"
-          bygglovskoll
-          kommun={i.kommun}
-          freeOffer={false}
-          heading="Vill du att vi hör av oss om utredningen?"
-          intro="Frivilligt. Vi återkommer med omfattning och pris innan något arbete påbörjas."
-          submitLabel="Skicka förfrågan"
-          successText="Vi hör av oss med nästa steg och bekräftar omfattningen innan något arbete påbörjas."
-        />
-      </div>
-    );
-  }
-
-  if (resultat?.outcome === "A") {
+  if (resultat?.outcome === "A" || resultat?.outcome === "B") {
+    const arB = resultat.outcome === "B";
+    const pris = villHaSvar ? copy.PRIS_MED_SVAR_KR : copy.PRIS_BAS_KR;
     return (
       <div className="card p-8">
         <h2 className="font-display text-2xl font-semibold text-slate-900 mb-4">
-          Bygglovskoll för ditt projekt — 99 kr
+          Bygglovskoll för ditt projekt — {pris} kr
         </h2>
-        <p className="text-slate-700 mb-6 leading-relaxed">
-          Du har angett {ATGARDER.find(([v]) => v === i.atgard)?.[1].toLowerCase()}
-          {i.yta !== null ? ` om ${i.yta} m²` : ""}
-          {i.hojd !== null ? ` och ${i.hojd} m` : ""} i {i.kommun}, på ett en- eller tvåbostadshus.
-          Utifrån det kan vi ta fram ett personligt underlag.
-        </p>
+
+        {arB ? (
+          <p className="text-slate-700 mb-6 leading-relaxed">{copy.B_KOP_BROD}</p>
+        ) : (
+          <p className="text-slate-700 mb-6 leading-relaxed">
+            Du har angett {ATGARDER.find(([v]) => v === i.atgard)?.[1].toLowerCase()}
+            {i.yta !== null ? ` om ${i.yta} m²` : ""}
+            {i.hojd !== null ? ` och ${i.hojd} m` : ""} i {i.kommun}, på ett en- eller tvåbostadshus.
+            Utifrån det kan vi ta fram ett personligt underlag.
+          </p>
+        )}
+
+        {arB && (
+          <div className="rounded-xl border border-slate-200 p-5 mb-6">
+            <h3 className="font-semibold text-slate-900 text-sm mb-2.5">{copy.B_OMSTANDIGHETER_RUBRIK}</h3>
+            <ul className="space-y-2.5">
+              {resultat.reasons.map((r, idx) => (
+                <li key={`${r.kod}-${idx}`} className="flex gap-2.5 text-sm text-slate-700 leading-relaxed">
+                  <span className="text-brand-600 mt-0.5" aria-hidden="true">•</span>
+                  <span>{r.text}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
 
         <div className="grid sm:grid-cols-2 gap-4 mb-6">
           <div className="rounded-xl border border-slate-200 p-4">
             <h3 className="font-semibold text-slate-900 text-sm mb-1.5">Vad du betalar för</h3>
             <p className="text-sm text-slate-700 leading-relaxed">
               Ett skriftligt underlag med klassning, tillämpliga regler, hur dina mått ligger mot
-              trösklarna, det vi inte kan se och en checklista mot {i.kommun}.
+              trösklarna, {arB ? "varje omständighet ovan med vad den betyder och hur du kontrollerar den" : "det vi inte kan se"} och
+              en checklista mot {i.kommun}.
             </p>
           </div>
           <div className="rounded-xl border border-slate-200 p-4">
@@ -275,6 +259,18 @@ export default function BygglovskollForm({ kommuner }: { kommuner: string[] }) {
             </p>
           </div>
         </div>
+
+        {villHaSvar && (
+          <div className="rounded-xl bg-brand-50 border border-brand-100 p-5 mb-6">
+            <h3 className="font-semibold text-slate-900 text-sm mb-1.5">
+              Tillägg: personligt svar (+{copy.PRIS_TILLAGG_KR} kr)
+            </h3>
+            <p className="text-sm text-slate-700 leading-relaxed mb-2">
+              Du får ett skriftligt svar på din fråga till {i.epost} inom två arbetsdagar.
+            </p>
+            <p className="text-sm text-slate-700 leading-relaxed">{copy.FRAGA_FORBEHALL}</p>
+          </div>
+        )}
 
         <p className="text-sm text-slate-700 bg-slate-50 border border-slate-200 rounded-xl p-4 mb-6 leading-relaxed">
           {copy.forbehall(idag)}
@@ -297,12 +293,19 @@ export default function BygglovskollForm({ kommuner }: { kommuner: string[] }) {
           disabled={!kryssVagledning || !kryssAngerratt || laddar}
           className="btn-primary w-full justify-center disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {laddar ? "Öppnar betalningen…" : "Betala 99 kr"}
+          {laddar ? "Öppnar betalningen…" : `Betala ${pris} kr`}
         </button>
         <div aria-live="polite">
           {fel && <p role="alert" className="text-red-600 text-sm mt-3 text-center">{fel}</p>}
         </div>
         <p className="text-xs text-slate-600 mt-4 leading-relaxed">{copy.ANGERRATT_INFO}</p>
+        <button
+          type="button"
+          onClick={() => { setResultat(null); setSteg(4); }}
+          className="mt-4 text-sm font-semibold text-brand-700 hover:text-brand-900 underline"
+        >
+          Ändra mina uppgifter
+        </button>
       </div>
     );
   }
@@ -406,6 +409,26 @@ export default function BygglovskollForm({ kommuner }: { kommuner: string[] }) {
           <Falt etikett="E-post">
             <input type="email" className={inputKlass} value={i.epost} onChange={(e) => uppd({ epost: e.target.value })} placeholder="anna@exempel.se" />
           </Falt>
+          <Falt etikett={copy.FRAGA_ETIKETT} hjalp={copy.FRAGA_HJALP}>
+            <textarea
+              rows={3}
+              maxLength={FRAGA_MAXLANGD}
+              className={`${inputKlass} resize-none`}
+              value={i.fraga}
+              onChange={(e) => uppd({ fraga: e.target.value })}
+            />
+            <p className="text-xs text-slate-500 mt-1">{i.fraga.length} / {FRAGA_MAXLANGD} tecken</p>
+            <label className="flex gap-3 text-sm text-slate-700 cursor-pointer mt-3">
+              <input
+                type="checkbox"
+                checked={villHaSvar}
+                onChange={(e) => setVillHaSvar(e.target.checked)}
+                className="mt-1 w-4 h-4 shrink-0"
+              />
+              <span>{copy.FRAGA_KRYSS}</span>
+            </label>
+            <p className="text-xs text-slate-600 mt-2 leading-relaxed">{copy.FRAGA_FORBEHALL}</p>
+          </Falt>
         </>
       )}
 
@@ -440,8 +463,8 @@ export default function BygglovskollForm({ kommuner }: { kommuner: string[] }) {
 
       <p className="text-xs text-slate-600 mt-5 leading-relaxed">
         Avstånd under {GRANS.avstandTomtgrans.toString().replace(".", ",")} m till tomtgräns, strandskydd,
-        kulturmiljö och installationer gör att vi hänvisar till utredning i stället för att sälja en
-        Bygglovskoll. Det visas innan du betalar.
+        kulturmiljö och installationer avgör inte om vi säljer — de blir omständigheter som listas i
+        ditt underlag med vad du ska kontrollera. Du ser dem innan du betalar.
       </p>
     </div>
   );
