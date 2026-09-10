@@ -96,7 +96,7 @@ export default function BygglovskollPage() {
         </div>
         <p className="text-sm text-slate-600 mt-8">
           Vill du i stället ha offert på handlingar eller ombud?{" "}
-          <Link href="/konsult" className="underline font-medium">Begär offert</Link>.
+          <Link href="/hjalp-med-bygglov#offert" className="underline font-medium">Begär offert</Link>.
         </p>
       </section>
     </div>

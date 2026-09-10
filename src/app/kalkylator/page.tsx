@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Calculator from "./Calculator";
+import { bygglovskollAktiv } from "@/lib/bygglovskoll/flag";
 
 export const metadata: Metadata = {
   title: "Bygglovskalkylator – Vad kostar ditt bygglov 2026?",
@@ -91,7 +92,10 @@ export default function KalkylatorPage() {
           </nav>
 
           <div className="text-center max-w-2xl mx-auto mb-12">
-            <span className="badge bg-brand-100 text-brand-700 mb-4">Kostnadsfritt verktyg</span>
+            {/* Badgen säger sant — kalkylatorn kostar inget att använda — men
+                ordet är samma som lintet stoppar på säljytorna. Samma innebörd,
+                annan formulering, så att lintet inte behöver ett undantag. */}
+            <span className="badge bg-brand-100 text-brand-700 mb-4">Fri att använda</span>
             <h1 className="font-display text-4xl sm:text-5xl font-bold text-slate-900 mb-5 leading-tight">
               Vad kostar ditt bygglov 2026?
             </h1>
@@ -124,17 +128,37 @@ export default function KalkylatorPage() {
             <h2 className="font-display text-xl font-bold text-slate-900 mb-3">
               Vill du ha en bindande offert?
             </h2>
-            <p className="text-slate-600 mb-6 max-w-xl mx-auto">
-              Vi matchar dig med en lokal bygglovskonsult som ger en konkret offert
-              baserat på just din kommun, din tomt och ditt projekt. Kostnadsfritt –
-              svar inom 24 timmar.
-            </p>
-            <Link href="/konsult" className="btn-primary">
-              Begär konsultmatchning
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-                <path d="M1 7H13M8 2L13 7L8 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </Link>
+            {/* Texten runt knappen beskrev samma gratis matchning som knappen
+                ledde till. Båda byts därför tillsammans — en ompekad länk under
+                ett löfte om kostnadsfri matchning hade bara flyttat problemet. */}
+            {bygglovskollAktiv() ? (
+              <>
+                <p className="text-slate-600 mb-6 max-w-xl mx-auto">
+                  Siffrorna ovan är riksgenomsnitt. Begär offert så återkommer vi med omfattning
+                  och pris för just ditt projekt innan något arbete påbörjas.
+                </p>
+                <Link href="/hjalp-med-bygglov#offert" className="btn-primary">
+                  Begär offert
+                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                    <path d="M1 7H13M8 2L13 7L8 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </Link>
+              </>
+            ) : (
+              <>
+                <p className="text-slate-600 mb-6 max-w-xl mx-auto">
+                  Vi matchar dig med en lokal bygglovskonsult som ger en konkret offert
+                  baserat på just din kommun, din tomt och ditt projekt. Kostnadsfritt –
+                  svar inom 24 timmar.
+                </p>
+                <Link href="/konsult" className="btn-primary">
+                  Begär konsultmatchning
+                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                    <path d="M1 7H13M8 2L13 7L8 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </div>

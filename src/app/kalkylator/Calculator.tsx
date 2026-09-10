@@ -159,8 +159,10 @@ export default function Calculator() {
           <Result label="Högsta totalkostnad" value={formatSek(totalHigh)} tone="high" />
         </div>
 
-        <Link href="/konsult" className="btn-primary w-full justify-center mt-8">
-          Få exakt offert
+        {/* Klientkomponent — flaggan går inte att läsa här. "Begär offert" och
+            offertsidan finns i båda lägena, så länken är oberoende av flaggan. */}
+        <Link href="/hjalp-med-bygglov#offert" className="btn-primary w-full justify-center mt-8">
+          Begär offert
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
             <path d="M1 7H13M8 2L13 7L8 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>

@@ -216,10 +216,13 @@ describe("förbjudna fraser", () => {
    * sidorna med flaggan på och granskar det som faktiskt når besökaren.
    */
   it.each([
-    ["startsidan", "../src/app/page"],
-    ["guideindex", "../src/app/guide/page"],
-    ["kontaktsidan", "../src/app/kontakt/page"],
-  ])("%s lovar inget kostnadsfritt när flaggan är på", async (namn, modul) => {
+    ["startsidan", "../src/app/page", true],
+    ["guideindex", "../src/app/guide/page", true],
+    ["kontaktsidan", "../src/app/kontakt/page", true],
+    ["kalkylatorn", "../src/app/kalkylator/page", false],
+    // Bygglovskollsidan ÄR ingången; den länkar inte till sig själv.
+    ["bygglovskollsidan", "../src/app/bygglovskoll/page", false],
+  ])("%s lovar inget kostnadsfritt när flaggan är på", async (namn, modul, kravBkLank) => {
     const ursprung = process.env.BYGGLOVSKOLL_ENABLED;
     process.env.BYGGLOVSKOLL_ENABLED = "true";
     vi.resetModules();
@@ -227,11 +230,15 @@ describe("förbjudna fraser", () => {
       const { renderToStaticMarkup } = await import("react-dom/server");
       const { default: Page } = await import(modul);
       const html = renderToStaticMarkup(Page() as never);
-      for (const fras of ["kostnadsfri", "gratis", "24 timmar", "24h", "/konsult"]) {
+      // «konsultmatchning» lovar ett nätverk som inte finns, och /konsult är
+      // borta: en länk dit fungerar bara via 301 och ska inte finnas i koden.
+      for (const fras of ["kostnadsfri", "gratis", "24 timmar", "24h", "konsultmatchning", "/konsult"]) {
         expect(html.toLowerCase().includes(fras), `"${fras}" renderas på ${namn}`).toBe(false);
       }
-      // Sanity: rätt sida renderades, och den bär den nya vägen.
-      expect(html, `${namn} saknar Bygglovskoll-ingången`).toContain("/bygglovskoll");
+      // Sanity: sidan renderade faktiskt något, och där en Bygglovskoll-ingång
+      // hör hemma finns den.
+      expect(html.length, `${namn} renderade nästan ingenting`).toBeGreaterThan(500);
+      if (kravBkLank) expect(html, `${namn} saknar Bygglovskoll-ingången`).toContain("/bygglovskoll");
     } finally {
       if (ursprung === undefined) delete process.env.BYGGLOVSKOLL_ENABLED;
       else process.env.BYGGLOVSKOLL_ENABLED = ursprung;

@@ -74,4 +74,14 @@ Inget att skriva förrän de gäller. Kontrolleras 2026-12-08.
 
 ---
 
-**27 poster.** Inget här blockerar release.
+---
+
+## E. Källstädning efter lanseringen av Bygglovskoll
+
+| # | Post | Prio |
+|---|---|---|
+| 28 | **`content/guider/byggsanktionsavgift.mdx:110`** och **`content/guider/overklaga-bygglov.mdx:171`** har kvar `](/konsult)`-länkar, den första med texten «Begär en kostnadsfri konsultbedömning – svar inom 24 timmar». De **når inte besökaren**: `saneraKonsultCta()` i `lib/cta.ts` skriver om raderna vid rendering när flaggan är på, och `tests/cta.test.ts` bevakar att ingen `/konsult`-länk blir kvar i utdatan. Det som står kvar är alltså källtext, inte publicerad copy. Städa den ändå vid nästa innehållspass, så att MDX-filerna säger samma sak som sajten och saneringen inte blir ett permanent lager. Alla `/konsult`-länkar i **koden** är borta sedan «fix: sista /konsult-lankarna -> offert». | P3 |
+
+---
+
+**28 poster.** Inget här blockerar release.
