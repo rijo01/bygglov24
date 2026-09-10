@@ -1,14 +1,18 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { bygglovskollAktiv } from "@/lib/bygglovskoll/flag";
 
 export const metadata: Metadata = {
   title: "Kontakta oss – Bygglov24",
   description:
-    "Kontakta Bygglov24 – Sveriges mest kompletta guide till bygglov. Mejla info@bygglov24.se så svarar vi inom 24 timmar.",
+    bygglovskollAktiv()
+      ? "Kontakta Bygglov24 – Sveriges mest kompletta guide till bygglov. Mejla info@bygglov24.se."
+      : "Kontakta Bygglov24 – Sveriges mest kompletta guide till bygglov. Mejla info@bygglov24.se så svarar vi inom 24 timmar.",
   alternates: { canonical: "https://bygglov24.se/kontakt" },
 };
 
 export default function KontaktPage() {
+  const bygglovskoll = bygglovskollAktiv();
   return (
     <div className="bg-gradient-to-b from-brand-50 to-white py-16">
       <div className="container-content">
@@ -19,7 +23,9 @@ export default function KontaktPage() {
         </nav>
 
         <div className="text-center mb-12">
-          <span className="badge bg-brand-100 text-brand-700 mb-4">Svar inom 24h</span>
+          <span className="badge bg-brand-100 text-brand-700 mb-4">
+            {bygglovskoll ? "E-post" : "Svar inom 24h"}
+          </span>
           <h1 className="font-display text-4xl sm:text-5xl font-bold text-slate-900 mb-5 leading-tight">
             Kontakta oss
           </h1>
@@ -36,7 +42,9 @@ export default function KontaktPage() {
           </div>
           <h2 className="font-display text-2xl font-bold text-slate-900 mb-2">Mejla oss</h2>
           <p className="text-slate-600 mb-6 text-sm">
-            Skicka ett mejl med din fråga så återkommer vi så snart vi kan — normalt inom 24 timmar på vardagar.
+            {bygglovskoll
+              ? "Skicka ett mejl med din fråga så återkommer vi så snart vi kan."
+              : "Skicka ett mejl med din fråga så återkommer vi så snart vi kan — normalt inom 24 timmar på vardagar."}
           </p>
           <a
             href="mailto:info@bygglov24.se"
@@ -49,12 +57,31 @@ export default function KontaktPage() {
 
         <div className="card p-6 mt-6 bg-slate-50 border-slate-200">
           <h3 className="font-display font-semibold text-slate-900 mb-2">Söker du bygglovshjälp?</h3>
-          <p className="text-sm text-slate-600 mb-4">
-            För konkret hjälp med bygglovsansökan – använd vår kostnadsfria matchning med lokala bygglovskonsulter.
-          </p>
-          <Link href="/konsult" className="btn-secondary text-sm">
-            Få kostnadsfri konsultation →
-          </Link>
+          {bygglovskoll ? (
+            <>
+              <p className="text-sm text-slate-600 mb-4">
+                Osäker på vad som gäller? Gör en Bygglovskoll för 99 kr. Behöver du handlingar,
+                ritningar eller en ansökan — begär offert.
+              </p>
+              <div className="flex flex-wrap gap-3">
+                <Link href="/bygglovskoll" className="btn-primary text-sm">
+                  Gör en Bygglovskoll för 99 kr →
+                </Link>
+                <Link href="/hjalp-med-bygglov#offert" className="btn-secondary text-sm">
+                  Begär offert
+                </Link>
+              </div>
+            </>
+          ) : (
+            <>
+              <p className="text-sm text-slate-600 mb-4">
+                För konkret hjälp med bygglovsansökan – använd vår kostnadsfria matchning med lokala bygglovskonsulter.
+              </p>
+              <Link href="/konsult" className="btn-secondary text-sm">
+                Få kostnadsfri konsultation →
+              </Link>
+            </>
+          )}
         </div>
       </div>
     </div>

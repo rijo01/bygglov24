@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { triage } from "../src/lib/bygglovskoll/triage";
 import { byggOrientering } from "../src/lib/bygglovskoll/templates";
 import * as copy from "../src/lib/bygglovskoll/copy";
@@ -202,6 +202,40 @@ describe("förbjudna fraser", () => {
       for (const fras of SALJFRASER) {
         expect(kalla.includes(fras), `"${fras}" förekommer i ${rel}`).toBe(false);
       }
+    }
+  });
+
+  /**
+   * De fyra sista gratis-CTA:erna låg utanför flagg-grenen och nådde
+   * produktion vid lanseringen: startsidan, guideindex och kontaktsidan
+   * erbjöd fortfarande «Få kostnadsfri konsultation» och länkade till
+   * /konsult, som numera 301:as till en sida med prissatta tjänster.
+   *
+   * Källkoden går inte att skanna här — filerna bär med avsikt BÅDA grenarna,
+   * och flagg-av-grenen ska innehålla just de orden. Testet renderar därför
+   * sidorna med flaggan på och granskar det som faktiskt når besökaren.
+   */
+  it.each([
+    ["startsidan", "../src/app/page"],
+    ["guideindex", "../src/app/guide/page"],
+    ["kontaktsidan", "../src/app/kontakt/page"],
+  ])("%s lovar inget kostnadsfritt när flaggan är på", async (namn, modul) => {
+    const ursprung = process.env.BYGGLOVSKOLL_ENABLED;
+    process.env.BYGGLOVSKOLL_ENABLED = "true";
+    vi.resetModules();
+    try {
+      const { renderToStaticMarkup } = await import("react-dom/server");
+      const { default: Page } = await import(modul);
+      const html = renderToStaticMarkup(Page() as never);
+      for (const fras of ["kostnadsfri", "gratis", "24 timmar", "24h", "/konsult"]) {
+        expect(html.toLowerCase().includes(fras), `"${fras}" renderas på ${namn}`).toBe(false);
+      }
+      // Sanity: rätt sida renderades, och den bär den nya vägen.
+      expect(html, `${namn} saknar Bygglovskoll-ingången`).toContain("/bygglovskoll");
+    } finally {
+      if (ursprung === undefined) delete process.env.BYGGLOVSKOLL_ENABLED;
+      else process.env.BYGGLOVSKOLL_ENABLED = ursprung;
+      vi.resetModules();
     }
   });
 

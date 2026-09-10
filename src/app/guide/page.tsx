@@ -4,6 +4,7 @@ import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
 import { Icon, type IconName } from "@/lib/icons";
+import { bygglovskollAktiv } from "@/lib/bygglovskoll/flag";
 
 export const metadata: Metadata = {
   title: "Guider om bygglov – Allt du behöver veta",
@@ -57,6 +58,7 @@ const guideIcons: Record<string, IconName> = {
 };
 
 export default function GuideIndexPage() {
+  const bygglovskoll = bygglovskollAktiv();
   const guides = getAllGuides();
 
   return (
@@ -110,12 +112,31 @@ export default function GuideIndexPage() {
           <h2 className="font-display text-2xl font-bold text-slate-900 mb-3">
             Osäker på vad som gäller?
           </h2>
-          <p className="text-slate-600 mb-6 max-w-lg mx-auto">
-            En lokal bygglovskonsult kan svara på dina specifika frågor och hjälpa dig hela vägen.
-          </p>
-          <Link href="/konsult" className="btn-primary">
-            Få kostnadsfri konsultation →
-          </Link>
+          {bygglovskoll ? (
+            <>
+              <p className="text-slate-600 mb-6 max-w-lg mx-auto">
+                Gör en Bygglovskoll för 99 kr — ett skriftligt underlag för just ditt projekt. Det
+                bindande beskedet ges av byggnadsnämnden.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                <Link href="/bygglovskoll" className="btn-primary">
+                  Gör en Bygglovskoll för 99 kr →
+                </Link>
+                <Link href="/hjalp-med-bygglov#offert" className="btn-secondary">
+                  Begär offert
+                </Link>
+              </div>
+            </>
+          ) : (
+            <>
+              <p className="text-slate-600 mb-6 max-w-lg mx-auto">
+                En lokal bygglovskonsult kan svara på dina specifika frågor och hjälpa dig hela vägen.
+              </p>
+              <Link href="/konsult" className="btn-primary">
+                Få kostnadsfri konsultation →
+              </Link>
+            </>
+          )}
         </div>
       </div>
     </div>

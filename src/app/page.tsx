@@ -22,12 +22,20 @@ const storstader = [
   "Örebro", "Västerås", "Helsingborg", "Norrköping", "Jönköping",
 ];
 
-const howSteps = [
-  { n: "1", title: "Identifiera din åtgärd", text: "Välj vad du vill bygga – tillbyggnad, garage, altan eller annat. Vi guidar dig till rätt kategori." },
-  { n: "2", title: "Kontrollera regler i din kommun", text: "Regler kan variera. Hitta exakt information för din kommun bland våra kommunguider." },
-  { n: "3", title: "Ansök eller anmäl", text: "Lär dig hur du fyller i ansökan korrekt, vilka handlingar som krävs och hur lång handläggningstiden är." },
-  { n: "4", title: "Få hjälp av en konsult", text: "Tveksam? Matcha med en lokal bygglovskonsult som hjälper dig hela vägen – kostnadsfri offert." },
-];
+/**
+ * Steg 4 skilde sig åt: med Bygglovskoll på finns ingen gratis matchning att
+ * hänvisa till, så steget beskriver de två vägar som faktiskt finns.
+ */
+function howSteps(bygglovskoll: boolean) {
+  return [
+    { n: "1", title: "Identifiera din åtgärd", text: "Välj vad du vill bygga – tillbyggnad, garage, altan eller annat. Vi guidar dig till rätt kategori." },
+    { n: "2", title: "Kontrollera regler i din kommun", text: "Regler kan variera. Hitta exakt information för din kommun bland våra kommunguider." },
+    { n: "3", title: "Ansök eller anmäl", text: "Lär dig hur du fyller i ansökan korrekt, vilka handlingar som krävs och hur lång handläggningstiden är." },
+    bygglovskoll
+      ? { n: "4", title: "Gör en Bygglovskoll eller begär offert", text: "Tveksam? Gör en Bygglovskoll för 99 kr, eller begär offert på handlingar, ritningar eller ansökan." }
+      : { n: "4", title: "Få hjälp av en konsult", text: "Tveksam? Matcha med en lokal bygglovskonsult som hjälper dig hela vägen – kostnadsfri offert." },
+  ];
+}
 
 const websiteSchema = {
   "@context": "https://schema.org",
@@ -47,6 +55,7 @@ export default function HomePage() {
   const guider = pelarguider();
 
   const bygglovskoll = bygglovskollAktiv();
+  const steg = howSteps(bygglovskoll);
 
   // Med Bygglovskoll på finns ingen gratis konsultmatchning och inget löfte om
   // svarstid — de två posterna tas bort i stället för att stå kvar osanna.
@@ -221,9 +230,9 @@ export default function HomePage() {
           </div>
 
           <div className="grid md:grid-cols-4 gap-6">
-            {howSteps.map((step, i) => (
+            {steg.map((step, i) => (
               <div key={i} className="relative">
-                {i < howSteps.length - 1 && (
+                {i < steg.length - 1 && (
                   <div className="hidden md:block absolute top-6 left-[calc(50%+20px)] w-[calc(100%-40px)] h-px bg-brand-200" />
                 )}
                 <div className="card p-6 text-center relative bg-white">
@@ -271,22 +280,45 @@ export default function HomePage() {
       </section>
 
       {/* ── Trust / CTA ──────────────────────────────────────────────────── */}
+      {/* Med flaggan på leder rutan till de två tjänster som finns, och lovar
+          ingen svarstid på 99-kronorsprodukten. Med flaggan av står dagens
+          text kvar ordagrant. */}
       <section className="py-16 bg-gradient-to-r from-brand-900 to-brand-700 text-white">
         <div className="container-content text-center">
           <h2 className="font-display text-3xl font-bold mb-4">
             Osäker på vad som gäller?
           </h2>
-          <p className="text-brand-200 text-lg mb-8 max-w-2xl mx-auto">
-            Låt en lokal bygglovskonsult bedöma ditt projekt. Kostnadsfri förfrågan – svar inom 24 timmar.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/konsult" className="btn-primary bg-white text-brand-900 hover:bg-brand-50 text-base px-8 py-4">
-              Få kostnadsfri konsultation →
-            </Link>
-            <Link href="/guide/ansokan" className="btn-secondary border-white/40 text-white hover:bg-white/10 text-base px-8 py-4">
-              Läs ansökningsguiden
-            </Link>
-          </div>
+          {bygglovskoll ? (
+            <>
+              <p className="text-brand-200 text-lg mb-8 max-w-2xl mx-auto">
+                Gör en Bygglovskoll för 99 kr — ett skriftligt underlag utifrån dina uppgifter, med
+                sannolik klassning, reglerna som gäller för den och vad du ska kontrollera. Det
+                bindande beskedet ges av byggnadsnämnden.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Link href="/bygglovskoll" className="btn-primary bg-white text-brand-900 hover:bg-brand-50 text-base px-8 py-4">
+                  Gör en Bygglovskoll för 99 kr →
+                </Link>
+                <Link href="/hjalp-med-bygglov#offert" className="btn-secondary border-white/40 text-white hover:bg-white/10 text-base px-8 py-4">
+                  Begär offert
+                </Link>
+              </div>
+            </>
+          ) : (
+            <>
+              <p className="text-brand-200 text-lg mb-8 max-w-2xl mx-auto">
+                Låt en lokal bygglovskonsult bedöma ditt projekt. Kostnadsfri förfrågan – svar inom 24 timmar.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Link href="/konsult" className="btn-primary bg-white text-brand-900 hover:bg-brand-50 text-base px-8 py-4">
+                  Få kostnadsfri konsultation →
+                </Link>
+                <Link href="/guide/ansokan" className="btn-secondary border-white/40 text-white hover:bg-white/10 text-base px-8 py-4">
+                  Läs ansökningsguiden
+                </Link>
+              </div>
+            </>
+          )}
         </div>
       </section>
     </>
