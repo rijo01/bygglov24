@@ -11,6 +11,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 
 process.env.STRIPE_SECRET_KEY = "sk_test_dummy_for_signing";
 process.env.STRIPE_PRICE_BYGGLOVSKOLL = "price_test_bygglovskoll";
+process.env.STRIPE_PRICE_BYGGLOVSKOLL_SVAR = "price_test_bygglovskoll_svar";
 process.env.BYGGLOVSKOLL_ENABLED = "true";
 
 const create = vi.fn();
@@ -48,6 +49,7 @@ function payload(over: Record<string, unknown> = {}) {
       befintligKomplementYta: null,
       installation: "nej",
       fritext: "",
+      fraga: "",
       epost: "test@exempel.se",
       ...over,
     },
@@ -79,12 +81,35 @@ describe("intag: formulärets payload hela vägen till triagen", () => {
     expect(metadata.classification).toBe("plank_mur");
   });
 
-  it("(b) ja på vatten, nej på övriga ger B med enbart vattenorsaken", async () => {
+  it("(b) ja på vatten, nej på övriga ger B — och B säljs numera", async () => {
+    // v1.1: B avvisas inte längre. Omständigheten blir innehåll i produkten,
+    // och köpvägen är densamma som vid A.
     const res = await POST(req(payload({ naraVatten: "ja" })));
+    expect(res.status).toBe(200);
+    expect((await res.json()).url).toContain("checkout.stripe.com");
+
+    const { metadata } = create.mock.calls[0][0];
+    expect(metadata.outcome).toBe("B");
+    expect(metadata.reasons).toBe("B2");
+    expect(metadata.regelspar).toBe("");
+    expect(metadata.naraVatten).toBe("ja");
+  });
+
+  it("orsakskoderna följer med i metadatan, även flera", async () => {
+    await POST(req(payload({ naraVatten: "vetej", installation: "ja" })));
+    const koder = create.mock.calls[0][0].metadata.reasons.split(",");
+    expect(koder).toContain("B2");
+    expect(koder).toContain("B5");
+  });
+
+  it("C säljs fortfarande inte", async () => {
+    const res = await POST(
+      req(payload({ atgard: "annat", yta: null, hojd: null, langd: null, fritext: "kan jag avstycka tomten" })),
+    );
     expect(res.status).toBe(409);
     const data = await res.json();
-    expect(data.outcome).toBe("B");
-    expect(data.reasons).toEqual(["B2"]);
+    expect(data.outcome).toBe("C");
+    expect(data.reasons).toEqual(["C1"]);
     expect(create).not.toHaveBeenCalled();
   });
 
@@ -127,11 +152,62 @@ describe("intag: formulärets payload hela vägen till triagen", () => {
     }
   });
 
-  it("B blockeras även när klienten kryssat i allt", async () => {
+  it("B går till Checkout med baspriset när tillägget inte är valt", async () => {
     const res = await POST(req(payload({ installation: "vetej" })));
-    expect(res.status).toBe(409);
-    expect((await res.json()).reasons).toEqual(["B5"]);
-    expect(create).not.toHaveBeenCalled();
+    expect(res.status).toBe(200);
+    const anrop = create.mock.calls[0][0];
+    expect(anrop.line_items).toEqual([{ price: "price_test_bygglovskoll", quantity: 1 }]);
+    expect(anrop.metadata.reasons).toBe("B5");
+  });
+
+  describe("tillägget «Fråga oss» väljer pris", () => {
+    it("utan kryss: baspriset", async () => {
+      await POST(req({ ...payload(), kopval: { personligtSvar: false } }));
+      expect(create.mock.calls[0][0].line_items).toEqual([
+        { price: "price_test_bygglovskoll", quantity: 1 },
+      ]);
+    });
+
+    it("med kryss och fråga: tilläggspriset", async () => {
+      await POST(
+        req({
+          ...payload({ fraga: "Räknas mitt växthus mot potten?" }),
+          kopval: { personligtSvar: true },
+        }),
+      );
+      expect(create.mock.calls[0][0].line_items).toEqual([
+        { price: "price_test_bygglovskoll_svar", quantity: 1 },
+      ]);
+    });
+
+    it("kryss men tom fråga är ett valideringsfel, inte ett tyst avstängt tillägg", async () => {
+      for (const fraga of ["", "   "]) {
+        create.mockClear();
+        const res = await POST(req({ ...payload({ fraga }), kopval: { personligtSvar: true } }));
+        expect(res.status).toBe(400);
+        const data = await res.json();
+        expect(data.kod).toBe("FRAGA_SAKNAS");
+        expect(data.error).toMatch(/Skriv din fråga/);
+        expect(create).not.toHaveBeenCalled();
+      }
+    });
+
+    it("frågan går aldrig till Stripe", async () => {
+      const hemlig = "min hemliga fråga om potten";
+      await POST(req({ ...payload({ fraga: hemlig }), kopval: { personligtSvar: true } }));
+      const anrop = create.mock.calls[0][0];
+      expect(JSON.stringify(anrop.metadata)).not.toContain(hemlig);
+      expect(Object.keys(anrop.metadata)).not.toContain("fraga");
+    });
+
+    it("för lång fråga avvisas", async () => {
+      const res = await POST(
+        req({ ...payload({ fraga: "x".repeat(801) }), kopval: { personligtSvar: true } }),
+      );
+      expect(res.status).toBe(400);
+      expect((await res.json()).error).toMatch(/högst 800 tecken/);
+      expect(create).not.toHaveBeenCalled();
+    });
   });
 
   it("samtycken krävs före allt annat", async () => {

@@ -25,11 +25,17 @@ const FORBJUDNA = [
   "nöjda kunder",
 ];
 
-/** Undantagna blocken: negationer där frasen är avsedd. */
-const UNDANTAG: string[] = [
-  ...copy.VAD_DET_INTE_AR,
-  copy.C_BROD,
-];
+/**
+ * Undantagna blocken: negationer där frasen är avsedd, plus förbehållet för
+ * tillägget «Fråga oss». Det sista innehåller ordet «svaret» i betydelsen «det
+ * skriftliga svar vi skickar» — inte «rätt svar på lovfrågan», som är den
+ * betydelse listan är skriven mot. Listan FORBJUDNA är oförändrad.
+ */
+// Längsta först: ett kortare undantag ("juridisk rådgivning") är en del av ett
+// längre, och stryks det först matchar det längre aldrig.
+const UNDANTAG: string[] = [...copy.VAD_DET_INTE_AR, copy.C_BROD, copy.FRAGA_FORBEHALL].sort(
+  (a, b) => b.length - a.length,
+);
 
 function stryckUndantag(text: string): string {
   let ut = text;
@@ -49,7 +55,7 @@ function bas(over: Partial<Intake> = {}): Intake {
     atgard: "fristaende", placering: "fristaende", yta: 12, hojd: 2.5, langd: null,
     avstandTomtgrans: 6, fastighetstyp: "villa", kommun: "Uppsala", fastighetsbeteckning: "",
     detaljplan: "ja", naraVatten: "nej", kulturSamfallighet: "nej", befintligaKomplement: "nej",
-    befintligKomplementYta: null, installation: "nej", fritext: "", epost: "a@b.se", ...over,
+    befintligKomplementYta: null, installation: "nej", fritext: "", fraga: "", epost: "a@b.se", ...over,
   };
 }
 
