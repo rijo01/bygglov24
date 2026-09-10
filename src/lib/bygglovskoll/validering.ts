@@ -1,4 +1,4 @@
-import type { Intake, JaNejVetEj } from "./types";
+import type { Intake, JaNejVetEj, Kopval } from "./types";
 
 /**
  * Kontraktet mellan formuläret och triagen.
@@ -12,6 +12,9 @@ import type { Intake, JaNejVetEj } from "./types";
  * Samma kontroll används på båda vägarna in: klientens POST till checkout och
  * intaket som byggs tillbaka ur Stripe-metadatan vid leverans.
  */
+
+/** Max längd på kundens egen fråga i tillägget «Fråga oss». */
+export const FRAGA_MAXLANGD = 800;
 
 const ATGARDER: ReadonlyArray<Intake["atgard"]> = [
   "tillbyggnad",
@@ -85,6 +88,9 @@ export function felIIntake(v: unknown): string | null {
   if (typeof i.fritext !== "string" || i.fritext.length > 500) {
     return "Beskrivningen får vara högst 500 tecken.";
   }
+  if (typeof i.fraga !== "string" || i.fraga.length > FRAGA_MAXLANGD) {
+    return `Frågan får vara högst ${FRAGA_MAXLANGD} tecken.`;
+  }
   if (typeof i.epost !== "string" || !/.+@.+\..+/.test(i.epost)) return "Ange en giltig e-postadress.";
 
   for (const [falt, meddelande] of [...TVINGANDE, ...OVRIGA_JNV]) {
@@ -97,4 +103,19 @@ export function felIIntake(v: unknown): string | null {
 /** Snäv typvakt runt felIIntake, så att anroparen får ett Intake att arbeta med. */
 export function arKomplettIntake(v: unknown): v is Intake {
   return felIIntake(v) === null;
+}
+
+/**
+ * Tillägget «Fråga oss» säljer ett svar på en fråga. Är rutan ikryssad men
+ * frågan tom finns ingenting att svara på, och kunden skulle betala 400 kr för
+ * ett tomt uppdrag. Det är ett valideringsfel, inte ett tyst avstängt tillägg —
+ * samma kontroll i formuläret och i rutten.
+ */
+export function felIKopval(intake: { fraga?: unknown }, kopval: Kopval | undefined): string | null {
+  if (!kopval?.personligtSvar) return null;
+  const fraga = typeof intake.fraga === "string" ? intake.fraga.trim() : "";
+  if (fraga.length === 0) {
+    return "Skriv din fråga i fältet ovan — det personliga svaret behöver en fråga att svara på.";
+  }
+  return null;
 }

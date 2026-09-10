@@ -39,6 +39,12 @@ export interface Intake {
   befintligKomplementYta: number | null;
   installation: JaNejVetEj;
   fritext: string;
+  /**
+   * Kundens egen fråga till tillägget «Fråga oss» (v1.1). Frivillig, max 800
+   * tecken. Går aldrig till Stripe-metadatan — bara i den signerade cookien och
+   * vidare i mejlet till oss. Påverkar inte triagen.
+   */
+  fraga: string;
   epost: string;
 }
 
@@ -57,6 +63,12 @@ export type Klassning =
 export interface Orsak {
   kod: string;
   text: string;
+}
+
+/** Köpalternativ. Tillägget «Fråga oss» väljer det dyrare priset i Checkout. */
+export interface Kopval {
+  /** Personligt skriftligt svar inom två arbetsdagar, +400 kr. */
+  personligtSvar: boolean;
 }
 
 export interface TriageResultat {

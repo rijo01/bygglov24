@@ -61,7 +61,9 @@ export function verifiera(varde: string | undefined): Intake | null {
  * nycklar à 500 tecken; intaket använder 17 plus fyra egna fält.
  *
  * Fritexten utelämnas medvetet: den kan vara 500 tecken, den är det enda fältet
- * med fri användartext, och den behövs inte för att bygga underlaget.
+ * med fri användartext, och den behövs inte för att bygga underlaget. Frågan i
+ * tillägget «Fråga oss» utelämnas av samma skäl och ett till: den ska gå till
+ * oss i mejlet, inte ligga hos betalleverantören.
  */
 export function intakeTillMetadata(i: Intake): Record<string, string> {
   const v = (x: string | number | null): string => (x === null ? "" : String(x));
@@ -117,6 +119,9 @@ export function metadataTillIntake(m: Record<string, string> | null | undefined)
     befintligKomplementYta: num(m.befintligKomplementYta),
     installation: m.installation,
     fritext: "",
+    // Frågan i tillägget «Fråga oss» skickas aldrig till Stripe. Den bärs bara
+    // av den signerade cookien, precis som fritexten.
+    fraga: "",
     epost: m.epost ?? "",
   };
   return arKomplettIntake(kandidat) ? kandidat : null;
